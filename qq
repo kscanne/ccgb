@@ -33,9 +33,9 @@ p
 ' |
 sed "
 /^<seg>/{
+s/\([^a-zA-ZАИМСЗаимсз]\)${1}\([^a-zA-ZАИМСЗаимсз]\)/\1<b class=\"gramadoir\">\2<\/b>\3/gI
 s/^<seg>//
 s/<\/seg>$//
-s/${1}/<b class=\"gramadoir\">&<\/b>/gI
 }
 "
 }
@@ -67,7 +67,7 @@ echo "<link rel=\"stylesheet\" href=\"http://borel.slu.edu/kps.css\" type=\"text
 echo "</head>"
 echo "<body>"
 versionout
-FILTERED=`echo "$@" | ${LIBEXECPATH}/commontok | tr "\n" "_" | sed 's/_/\\\\\\|/g' | sed 's/^/\\\\\\(/; s/..$/\\\\\\)/'`
+FILTERED=`for term in "$@"; do echo "$term"; done | ${MUTATER} | tr "\n" "_" | sed 's/_/\\\\\\|/g' | sed 's/^/\\\\\\(/; s/..$/\\\\\\)/'`
 ${LIBEXECPATH}/mivec "${MAXHITS}" "${MUTATER}" "$@" | xmltohtml "${FILTERED}"
 echo "<hr>"
 echo "</body>"
