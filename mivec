@@ -119,6 +119,6 @@ else
 	shift
 	shift
 	xml_start
-	echo "$@" | ${LIBEXECPATH}/commontok | faigh "$@"
+	echo "$@" | ${LIBEXECPATH}/commontok | sort -u | faigh "$@"
 	xml_end
 fi
