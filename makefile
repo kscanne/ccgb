@@ -45,7 +45,7 @@ mor.db : pptog huge.txt
 	cat huge.txt | ./pptog mor.db
 
 clean :
-	rm -f *.o ppfaigh pptog *.c~
+	rm -f *.o ppfaigh pptog *.c~ fadhbanna.txt
 
 distclean :
 	$(MAKE) clean
@@ -58,7 +58,7 @@ fadhbanna.txt : huge.txt
 	cat huge.txt | sed 's/ .*//' | sed 's/-b:/:/' | sort | uniq -c | egrep -v '^ *2 ' > fadhbanna.txt
 
 veicteoir.txt : huge.txt
-	./builder > veicteoir.txt
+	cat huge.txt | perl builder > veicteoir.txt
 
 veicteoir.db : pptog veicteoir.txt
 	rm -f veicteoir.db
