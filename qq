@@ -100,7 +100,7 @@ do
 			ACTION=html
 		;;
 		"--mutate" )
-			MUTATER=mutate
+			MUTATER=/usr/local/bin/mutate
 		;;
 		"--version" )
 			versionout

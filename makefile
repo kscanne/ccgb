@@ -20,6 +20,7 @@ install : all
 	$(INSTALL_DATA) veicteoir.db $(pkgdatadir)/veicteoir.db
 	$(INSTALL_DATA) stoplist $(pkgdatadir)/stoplist
 	$(INSTALL_PROGRAM) qq $(bindir)/qq
+	$(INSTALL_PROGRAM) mutate $(bindir)/mutate
 	$(INSTALL_PROGRAM) ppfaigh $(libexecdir)/ppfaigh
 	$(INSTALL_PROGRAM) mivec $(libexecdir)/mivec
 	$(INSTALL_PROGRAM) commontok $(libexecdir)/commontok
@@ -29,6 +30,7 @@ uninstall :
 	rm -f $(pkgdatadir)/veicteoir.db
 	rm -f $(pkgdatadir)/stoplist
 	rm -f $(bindir)/qq
+	rm -f $(bindir)/mutate
 	rm -f $(libexecdir)/ppfaigh
 	rm -f $(libexecdir)/mivec
 	rm -f $(libexecdir)/commontok
