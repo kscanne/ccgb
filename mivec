@@ -2,9 +2,8 @@
 #
 #   Only called by "qq".   Thus this ends up in libexec and not in bin.
 #    
-#  Usage:  mivec MAXHITS (cat|mutate)     <-- usual usage for search
-#                                             search terms come in on stdin
-#    or    mivec FILENAME                 <--  dumps whole file as TMX 
+#  Usage:  mivec MAXHITS (cat|mutate) WORD WORD...    <-- usual usage for search
+#    or    mivec FILENAME    <--  dumps whole file from diolaim/comp as TMX 
 #
 #
 LIBEXECPATH=/usr/local/libexec
@@ -66,29 +65,70 @@ s/ *<\/seg>$/<\/seg>/
 '
 }
 
-# main filter -- input stream is the list of search terms (one per line)
+# main filter -- input stream to this function is the list of
+# search terms (one per line); see commontok
 faigh()
 {
+ QUOTED=`for term in "$@"; do echo -n "\"$term\" "; done`
  TERMS=`cat`
- echo "<note>Results of search for \"`echo "${TERMS}" | tr "\n" " "`\"</note>" | sed 's/ "<\/note>/"<\/note>/'
+ COUNT=`echo "${TERMS}" | wc -l`
+ echo "<note>Results of search for ${QUOTED}</note>" | sed 's/ "<\/note>/"<\/note>/'
  header_to_body_transition
- echo "${TERMS}" | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/veicteoir.db n | tr " " "\n" | grep '.' | sort | uniq -c | sort -r -n | sed 's/^ *[0-9]* //' | head -n "${MAXHITS}" | doublygood | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db y | 
+echo "${TERMS}" | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/veicteoir.db n | tr " " "\n" | grep '.' | sort | uniq -c | egrep "^ *${COUNT} " | sed 's/^ *[0-9]* //' | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db y | 
+while read cand
+do
+	IMOK="true"
+	for term in "$@"
+	do
+		if echo "$term" | egrep ' ' > /dev/null
+		then
+			if ! echo "$cand" | egrep "$term" > /dev/null
+			then
+				IMOK="false"
+			fi
+		fi
+	done
+	if [ "$IMOK" = "true" ]
+	then
+		echo "$cand" | sed 's/ .*//'
+	fi
+done |
+head -n "${MAXHITS}" | doublygood |
+${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db y | 
+# echo "${TERMS}" | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/veicteoir.db n | tr " " "\n" | grep '.' | sort | uniq -c | sort -r -n | sed 's/^ *[0-9]* //' | head -n "${MAXHITS}" | doublygood | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db y | 
  sentences_into_tmx
 }
 
-if [ $# -eq 2 ]
+if [ $# -eq 0 ]
 then
-	MAXHITS="${1}"
-	MUTATER="${2}"
-	xml_start
-	${LIBEXECPATH}/commontok | "${MUTATER}" | faigh
-	xml_end
+	echo "Usage error"
+	exit
 elif [ $# -eq 1 ]
 then
 #	xml_start
 #	header_to_body_transition
 	cat ${HOME}/gaeilge/diolaim/comp/${1} | sed 's/: .*//' | sed "s/^/${1}:/" | doublygood | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db y | sentences_into_tmx
 #	xml_end
+elif [ $# -eq 2 ]
+then
+	echo "Usage error: did you forget to include some search terms?"
+	exit
 else
-	echo "mivec: Usage error."
+	if ! echo "${1}" | egrep '^[0-9]+$' > /dev/null
+	then
+		echo "Usage error: first argument must be a positive integer (max hits)"
+		exit
+	fi
+	if ! echo "${2}" | egrep '^(cat|mutate)$' > /dev/null
+	then
+		echo "Usage error: second argument must be \"cat\" or \"mutate\""
+		exit
+	fi
+	MAXHITS="${1}"
+	MUTATER="${2}"
+	shift
+	shift
+	xml_start
+	echo "$@" | ${LIBEXECPATH}/commontok | "${MUTATER}" | faigh "$@"
+	xml_end
 fi
