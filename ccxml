@@ -1,0 +1,3 @@
+#!/bin/bash
+LATINONE=`echo "${1}" | iconv -f utf8 -t iso88591`
+LC_ALL="ga_IE" /usr/local/bin/qq "${LATINONE}" | iconv -f iso88591 -t utf8
