@@ -2,6 +2,29 @@
 LIBEXECPATH=/usr/local/libexec
 DATAPATH=/usr/local/share/corpas
 
+# words come in one per line, lowercase, etc.
+mutate()
+{
+while read x
+do
+	echo "${x}"
+	echo "${x}" | 
+sed -n 's/^[aeiouáéíóú].*$/n-&\
+t-&\
+n&\
+t&\
+h&/p'
+	echo "${x}" | sed -n "s/^\([bcdfgmpst]\)\([^h'-]\)/\1h\2/p"
+	echo "${x}" | sed -n 's/^b[^h]/m&/p'
+	echo "${x}" | sed -n 's/^c[^h]/g&/p'
+	echo "${x}" | sed -n "s/^[dg][^h']/n&/p"
+	echo "${x}" | sed -n "s/^f[^h]/bh&/p"
+	echo "${x}" | sed -n "s/^p[^h]/b&/p"
+	echo "${x}" | sed -n "s/^s[aeiouáéíóúlnr]/t&/p"
+	echo "${x}" | sed -n "s/^t[^h]/d&/p"
+done
+}
+
 # takes a stream of line numbers and for each one
 # echoes it, but also prints it's "foil" either with "-b" or without.
 doublygood()
@@ -28,6 +51,7 @@ faigh()
  echo '</header>'
  echo '<body>'
  echo "${TERMS}" | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/veicteoir.db n | tr " " "\n" | grep '.' | sort | uniq -c | sort -r -n | sed 's/^ *[0-9]* //' | head -n "${MAXHITS}" | doublygood | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db y | 
+sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g' |
 sed '
 N
 /^[^:]*-b:/s/^\([^:]*\):\([^ ]*\) \(.*\)\n\([^ ]*\) \([^\n]*\)/<tu>\n<prop type="document">\1<\/prop>\n<prop type="line">\2<\/prop>\n<tuv xml:lang="en">\n<seg>\3<\/seg>\n<\/tuv>\n<tuv xml:lang="ga">\n<seg>\5<\/seg>\n<\/tuv>\n<\/tu>/
@@ -42,10 +66,11 @@ s/ *<\/seg>$/<\/seg>/
 }
 
 MAXHITS="${1}"
+MUTATER="${2}"
 echo '<?xml version="1.0"?>'
 echo '<!DOCTYPE tmx SYSTEM "http://www.lisa.org/tmx/tmx14.dtd">'
 echo '<tmx version="1.4">'
 echo '<header creationtool="CCGB" creationtoolversion="0.01" segtype="block" o-tmf="none" adminlang="en-us" srclang="en" datatype="plaintext">'
-${LIBEXECPATH}/commontok | faigh
+${LIBEXECPATH}/commontok | "${MUTATER}" | faigh
 echo '</body>'
 echo '</tmx>'
