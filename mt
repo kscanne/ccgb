@@ -7,7 +7,7 @@ use Fcntl;
 use Locale::PO;
 use Lingua::EN::Sentence qw( get_sentences );
 use Lingua::EN::Tagger;
-use Text::Diff;
+# use Text::Diff;
 use File::Copy;
 
 if (@ARGV == 0) {
@@ -137,9 +137,11 @@ sub get_focloir_hitz
 {
 	open OUTPUT, ">/tmp/focloirin.txt";
 	print OUTPUT "English-Irish dictionary\n";
+	my @hitz;
 	foreach my $word (keys %currentlemmas) {
-		print OUTPUT $_ foreach (grep(/^$word  /, @focloir));
+		push @hitz, grep(/^$word  /, @focloir);
 	}
+	print OUTPUT $_ foreach (sort @hitz);
 	close OUTPUT;
 }
 
@@ -199,21 +201,27 @@ sub vim_translate
 my ($id) = @_;
 my $stripped = $id;
 $stripped =~ s/[&~]//g;
+$stripped =~ s/\\.//g;
+$stripped =~ s/[:<>\/]/ /g;
+$stripped =~ s/^msgid //;
 lemmatize($stripped);
 get_best_corpus_hitz();
 get_focloir_hitz();
 open OUTPUT, ">/tmp/toedit.po";
-print OUTPUT "msgid $id\nmsgstr $id\n";
+print OUTPUT "$id\n";
+$id =~ s/^msgid/msgstr/;
+print OUTPUT "$id\n";
 close OUTPUT;
 system 'vim -u /home/kps/.poeditrc -n /tmp/toedit.po';
 open INPUT, "</tmp/toedit.po";
 my $msgstr_started = '';
 my $ans = '';
 while (<INPUT>) {
+	chomp;
 	if (/^msgstr "/) {
 		$msgstr_started = 'true';
-		s/^msgstr +"//;
-		s/"\s*//;
+		s/^msgstr +"/"/;
+		s/"\s*$//;
 		$ans .= $_;
 	}
 	else {
@@ -224,6 +232,7 @@ while (<INPUT>) {
 		}
 	}
 }
+$ans =~ s/$/"/;
 close INPUT;
 return $ans;
 }
@@ -234,31 +243,29 @@ return $ans;
 sub translate_me
 {
 my ($msg) = @_;
-my $ma = $msg->automatic();
-my $mc = $msg->comment();
-my $mr = $msg->reference();
-my $id = $msg->msgid();
-print "# $ma\n" if $ma;
-print "# $mc\n" if $mc;
-print "# $mr\n" if $mr;
-print "msgid $id\n" if $id;
+print $msg->dump;
 my $i='x';
 while ($i =~ /^[^1234]/) {
 	$i=userinput('(1)translate,(2)skip,(3)copy msgid,(4)exit');
 }
 if ($i =~ m/^1/) {
-	my $temp = vim_translate($id);
-	$msg->msgstr($temp);
+	my $clean_id = $msg->dump;
+	$clean_id =~ s/^.*\nmsgid "/msgid "/s;
+	$clean_id =~ s/\nmsgstr ".*//s;
+	my $temp = vim_translate($clean_id);
+	$msg->msgstr($msg->dequote($temp));
+	return 1;
 }
 elsif ($i =~ m/^2/) {
 	1;  # do nothing
 }
 elsif ($i =~ m/^3/) {
-	$msg->msgstr($msg->msgid());
+	$msg->msgstr($msg->dequote($msg->msgid()));
 }
 elsif ($i =~ m/^4/) {
 	$done_p = 'true';
 }
+return 0;
 }
 
 
@@ -275,20 +282,33 @@ while ($ARGV = shift @ARGV) {
 		my $str = $msg->msgstr();
 		if (defined($id) && defined($str)) {
 			if ($str and $id) {
-				translate_me($msg) if ($str eq '""');
+				if ($str eq '""') {
+					Locale::PO->save_file_fromarray('/tmp/temp.po',$aref) if (translate_me($msg));
+				}
 				last if $done_p;
 			}
 		}
 	}
-	Locale::PO->save_file_fromarray('/tmp/temp.po',$aref);
-	system 'msgcat /tmp/temp.po > /tmp/temp2.po';
-	my $diff = diff $ARGV, '/tmp/temp2.po', { STYLE => "Unified" };
-	print $diff;
-	my $ok='?';
-	while ($ok =~ m/^[^YNyn]/) {
-		$ok=userinput('Commit changes (y/n)?');
+	my $rv = system 'msgcat /tmp/temp.po > /tmp/temp2.po';
+	if ($rv > 0) {
+		print STDERR "Syntax errors in PO file, aborting...\n";
+		exit 1;
 	}
-	copy('/tmp/temp2.po', $ARGV) if ($ok =~ m/^[Yy]/);
+	else {
+		my $rv2 = system "diff -u $ARGV /tmp/temp2.po";
+#		my $diff = diff $ARGV, '/tmp/temp2.po', { STYLE => "Unified" };
+		if ($rv2) {
+#			print $diff;
+			my $ok='?';
+			while ($ok =~ m/^[^YNyn]/) {
+				$ok=userinput('Commit changes (y/n)?');
+			}
+			copy('/tmp/temp2.po', $ARGV) if ($ok =~ m/^[Yy]/);
+		}
+		else {
+			print "File unchanged.\n";
+		}
+	}
 }
 
 # untie %corpas;
