@@ -54,19 +54,22 @@ main (int argc, char* argv[])
 	      fprintf(stderr, "Neither a space nor a newline.\n");
 	     }
 	}
-      key.size = split - token;
-      key.data = malloc (key.size + 1);
+	  // keep null characters at end of all keys/data in db 
+      key.size = split - token + 1;
+      key.data = malloc (key.size);
       *split = 0;
       strcpy (key.data, token);
       len = strlen (split + 1);
       if (len > 0) {
           *(split + len) = 0;	/* was newline */
-          data.size = len - 1;
-          data.data = malloc (data.size + 1);
+          data.size = len ;
+          data.data = malloc (data.size);
           strcpy (data.data, split + 1);
 	 }
       else {
-          data.size = 0;
+          data.size = 1;
+          data.data = malloc (1);
+	  *((char*) data.data) = 0;
          }
       if ((ret = dbp->put (dbp, NULL, &key, &data, 0)) == 0) {
 	 printf ("db: %s: key stored.\n", (char *) key.data);
