@@ -1,0 +1,17 @@
+#!/bin/bash
+if [ $# -eq 0 ]
+then
+	echo "Usage: qq [SEARCHTERMS]"
+	exit 1
+fi
+if [ "${1}" = "--version" ]
+then
+	echo "<p>"
+	echo "<a href="/corpas/index.html">Corpas Comhthreomhar Gaeilge-Béarla</a>, leagan 0.01<br>"
+	echo "Copyright (C) 2004 <a href=\"http://borel.slu.edu/\">Kevin P. Scannell</a><br><br>"
+	echo "<i>"
+	echo "Is saorbhogearra an ríomhchlár seo; féach ar an bhunchód le haghaidh coinníollacha cóipeála.  Níl baránta AR BITH ann; go fiú níl baránta ann d'INDÍOLTACHT nó FEILIÚNACHT DO FHEIDHM AR LEITH, an oiread atá ceadaithe de réir dlí."
+	echo "</i></p><hr>"
+else
+	echo "$@" | /usr/local/libexec/mivec -s
+fi

@@ -1,0 +1,90 @@
+#!/bin/bash
+# like mivectors but tweaked a bit to deal with filenames, etc.
+
+DATAPATH=/usr/local/share/corpas
+LIBEXECPATH=/usr/local/libexec
+
+BDCHARS="A-Za-z¡…Õ”⁄·ÈÌÛ˙"
+INTCHARS="'-"
+MAXHITS=250
+
+tokenize()
+{
+tr -s "[:space:]" "\n" |
+sed "
+s/[${BDCHARS}][${BDCHARS}${INTCHARS}]*/<c>&<\/c>/g;
+s/\([${INTCHARS}][${INTCHARS}]*\)<\/c>/<\/c>\1/g;
+" |
+sed "
+s/<c>/\n/g
+s/<\/c>/\n/g
+" | grep "[${BDCHARS}]"
+}
+
+prep()
+{
+	grep ' ' huge.txt | sed 's/^[^ ]* //'
+}
+
+# filter -- input stream is the list of corpus words to be grepped out
+# of corpus and line numbers stored in veic.db
+storail()
+{
+while read patrun
+do
+	answer=`grep -i -w "${patrun}" huge.txt | sed 's/ .*//' | sed '$!N' | tr "\n" " "`
+	echo "${patrun} ${answer}"
+done
+}
+
+# takes a stream of line numbers and for each one
+# echoes it, but also prints it's "foil" either with "-b" or without.
+doublygood()
+{
+while read ref
+do
+	echo "${ref}"
+	if echo "${ref}" | egrep -e '-b:' > /dev/null
+	then
+		echo "${ref}" | sed 's/-b:/:/'	
+	else
+		echo "${ref}" | sed 's/:/-b:/'	
+	fi
+done
+}
+
+# filter -- input stream is the list of search terms and output 
+# is the list of line numbers 
+faigh()
+{
+ TERMS=`cat`
+ REGEXP=`echo "${TERMS}" | tr "\n" "_" | sed 's/_/\\\\\\|/g' | sed 's/^/\\\\\\(/; s/..$/\\\\\\)/'`
+ echo "${TERMS}" | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/veicteoir.db | tr " " "\n" | grep '.' | sort | uniq -c | sort -r -n | sed 's/^ *[0-9]* //' | head -n "${MAXHITS}" | doublygood | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db | sed 'N; s/\n/<br><br>/' | sed "s/${REGEXP}/<b class=\"gramadoir\">&<\/b>/gI" | sed 's/^/<br>/; s/$/<br><hr>/'
+}
+
+
+if [ $# -ne 1 ]
+then
+	echo "Usage: mivec [-t|-s]"
+	exit 1
+fi
+PREPROCESS=""
+PROCESSOR=""
+if [ "${1}" = "-s" ]
+then
+	PROCESSOR="faigh"
+	PREPROCESS="cat"
+else
+	if [ "${1}" = "-t" ]
+	then
+		PROCESSOR="storail"
+		PREPROCESS="prep"
+	fi
+fi
+if [ -z ${PROCESSOR} ]
+then
+	echo "Usage: mivec [-t|-s]"
+	exit 1
+fi
+
+${PREPROCESS} | tokenize | tr "[:upper:]" "[:lower:]" | grep '..' | grep -v -x -f ${DATAPATH}/stoplist  | sort -u  | ${PROCESSOR}
