@@ -1,4 +1,9 @@
 #!/bin/bash
+#  This is a tokenizer special to the CCGB.
+#   It "normalizes" words into the form used as keys in db,
+#  e.g. all lowercase, no stopwords.
+#    So don't use it as a tokenizer for other projects.
+#   (This is why it is in libexec and not bin)
 
 DATAPATH=/usr/local/share/corpas
 BDCHARS="A-Za-z¡…Õ”⁄·ÈÌÛ˙"
