@@ -9,14 +9,16 @@ main (int argc, char *argv[])
 {
   DB *dbp;
   DBT key, data;
-  int ret, len, t_ret;
+  int ret, len, t_ret, showkey_p;
   char token[1024];
 
-  if (argc != 2)
+  if (argc != 3)
     {
-      fprintf (stderr, "Usage: ppfaigh dbfile\n");
+      fprintf (stderr, "Usage: ppfaigh dbfile [y|n]\n");
       exit (1);
     }
+
+  showkey_p = !strcmp(argv[2],"y");
 
   if ((ret = db_create (&dbp, NULL, 0)) != 0)
     {
@@ -40,6 +42,7 @@ main (int argc, char *argv[])
       key.data = token;
       if ((ret = dbp->get (dbp, NULL, &key, &data, 0)) == 0)
 	{
+	  if (showkey_p) printf ("%s ", (char*) key.data);
 	  printf ("%s\n", (char *) data.data);
 	}
       else
