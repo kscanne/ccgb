@@ -20,5 +20,4 @@ s/<\/c>/\n/g
 " | grep "[${BDCHARS}]" |
 tr "[:upper:]" "[:lower:]" |
 grep '..' |
-grep -v -x -f ${DATAPATH}/stoplist |
-sort -u
+grep -v -x -f ${DATAPATH}/stoplist
