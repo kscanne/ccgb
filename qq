@@ -1,4 +1,27 @@
 #!/bin/bash
+
+xmltohtml()
+{
+sed -n "
+/^<tu>/{
+s/.*/<hr>/
+p
+}
+/^<\/tuv/{
+N
+s/\n//
+s/<\/tuv><tuv.*>/<br><br>/ 
+s/<\/tuv><\/tu>/<br>/
+p
+}
+/^<seg>/{
+s/^<seg>//
+s/<\/seg>$//
+p
+}
+"
+}
+
 if [ "${1}" = "--version" ]
 then
 	echo "<p>"
@@ -8,5 +31,10 @@ then
 	echo "Is saorbhogearra an ríomhchlár seo; féach ar an bhunchód le haghaidh coinníollacha cóipeála.  Níl baránta AR BITH ann; go fiú níl baránta ann d'INDÍOLTACHT nó FEILIÚNACHT DO FHEIDHM AR LEITH, an oiread atá ceadaithe de réir dlí."
 	echo "</i></p><hr>"
 else
-	echo "$@" | /usr/local/libexec/mivec -s
+	if [ "${1}" = "--html" ]
+	then
+		echo "$@" | /usr/local/libexec/mivec | xmltohtml
+	else
+		echo "$@" | /usr/local/libexec/mivec | iconv -f iso88591 -t utf8
+	fi
 fi

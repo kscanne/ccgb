@@ -1,4 +1,4 @@
 #!/bin/bash
 LC_ALL="ga_IE" /usr/local/bin/qq --version
 (date; echo "${1}"; echo; echo;) >> /home/httpd/cc.log
-LC_ALL="ga_IE" /usr/local/bin/qq "${1}"
+LC_ALL="ga_IE" /usr/local/bin/qq --html "${1}"
