@@ -33,10 +33,10 @@ uninstall :
 
 mor.db : pptog huge.txt
 	rm -f mor.db
-	cat huge.txt | pptog mor.db
+	cat huge.txt | ./pptog mor.db
 
 clean :
-	rm -f *.o ppfaigh pptog
+	rm -f *.o ppfaigh pptog *.c~
 
 distclean :
 	$(MAKE) clean
@@ -47,14 +47,13 @@ huge.txt : $(PARADIR)
 
 veicteoir.db : pptog huge.txt
 	rm -f veicteoir.db
-	mivec -t | pptog veicteoir.db
+	$(libexecdir)/mivec -t | ./pptog veicteoir.db
 
 op.o : op.c
 	gcc -c op.c
 
 pptog : op.o
 	gcc -o pptog op.o -ldb
-	cp -f pptog ${HOME}/clar/denartha
 
 get.o : get.c
 	gcc -c get.c
