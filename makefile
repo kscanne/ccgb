@@ -49,7 +49,7 @@ clean :
 
 distclean :
 	$(MAKE) clean
-	rm -f veicteoir.db mor.db huge.txt veicteoir.txt
+	rm -f veicteoir.db mor.db huge.txt veicteoir.txt lengths.txt
 
 huge.txt :
 	(cd $(PARADIR); egrep -H . * | sed 's/: / /' > $(THISDIR)/huge.txt)
@@ -85,4 +85,4 @@ installweb :
 	$(INSTALL_PROGRAM) cc.cgi /home/httpd/cgi-bin
 	$(INSTALL_PROGRAM) ccweb /usr/local/bin
 
-.PRECIOUS : mor.db veicteoir.db huge.txt
+.PRECIOUS : mor.db veicteoir.db huge.txt lengths.txt
