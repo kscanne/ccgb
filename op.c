@@ -4,13 +4,15 @@
 #include <string.h>
 #include <db.h>
 
+#define MAXDATASZ 2097152
+
 int
 main (int argc, char *argv[])
 {
   DB *dbp;
   DBT key, data;
-  int ret, len;
-  char token[65535];
+  int ret, len, t_ret;
+  char token[MAXDATASZ];
   char *split;
 
   if (argc != 2)
@@ -31,11 +33,10 @@ main (int argc, char *argv[])
       goto err;
     }
 
-  while (fgets (token, 65535, stdin) != NULL)
+  while (fgets (token, MAXDATASZ, stdin) != NULL)
     {
       memset (&key, 0, sizeof (key));
       memset (&data, 0, sizeof (data));
-//      printf ("read token=\"%s\"\n", token);
       split = strchr (token, ' ');
       if (split == NULL)
 	{
@@ -43,27 +44,19 @@ main (int argc, char *argv[])
 	  if (split == NULL)
 	    {
 	      fprintf (stderr, "Neither a space nor a newline.\n");
+	      continue;
 	    }
 	}
       // keep null characters at end of all keys/data in db 
       key.size = split - token + 1;
-      key.data = malloc (key.size);
       *split = 0;
-      strcpy (key.data, token);
+      key.data = token;
       len = strlen (split + 1);
-      if (len > 0)
-	{
-	  *(split + len) = 0;	/* was newline */
-	  data.size = len;
-	  data.data = malloc (data.size);
-	  strcpy (data.data, split + 1);
-	}
-      else
-	{
-	  data.size = 1;
-	  data.data = malloc (1);
-	  *((char *) data.data) = 0;
-	}
+      if (len == 0)
+	len = 1;
+      *(split + len) = 0;	/* was newline */
+      data.size = len;
+      data.data = split + 1;
       if ((ret = dbp->put (dbp, NULL, &key, &data, 0)) == 0)
 	{
 	  printf ("db: %s: key stored.\n", (char *) key.data);
@@ -74,11 +67,9 @@ main (int argc, char *argv[])
 	  dbp->err (dbp, ret, "DB->put");
 	  goto err;
 	}
-      free (key.data);
-      free (data.data);
     }
 
-  err: if ((t_ret = dbp->close (dbp, 0)) != 0 && ret == 0)
+err:if ((t_ret = dbp->close (dbp, 0)) != 0 && ret == 0)
     ret = t_ret;
   exit (ret);
 }
