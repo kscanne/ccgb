@@ -47,6 +47,9 @@ distclean :
 huge.txt :
 	(cd $(PARADIR); egrep -H . * | sed 's/: / /' > $(THISDIR)/huge.txt)
 
+fadhbanna.txt : huge.txt
+	cat huge.txt | sed 's/ .*//' | sed 's/-b:/:/' | sort | uniq -c | egrep -v '^ *2 ' > fadhbanna.txt
+
 veicteoir.txt : huge.txt
 	./builder > veicteoir.txt
 
