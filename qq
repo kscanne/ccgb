@@ -1,6 +1,12 @@
 #!/bin/bash
 
 LIBEXECPATH=/usr/local/libexec
+MAXHITS=250
+
+mutate()
+{
+cat
+}
 
 xmltohtml()
 {
@@ -37,22 +43,68 @@ s/${FILTERED}/<b class=\"gramadoir\">&<\/b>/gI
 "
 }
 
-if [ "${1}" = "--version" ]
-then
+versionout()
+{
 	echo "<p>"
 	echo "<a href="/corpas/index.html">Corpas Comhthreomhar Gaeilge-Béarla</a>, leagan 0.01<br>"
 	echo "Copyright (C) 2004 <a href=\"http://borel.slu.edu/\">Kevin P. Scannell</a><br><br>"
 	echo "<i>"
 	echo "Is saorbhogearra an ríomhchlár seo; féach ar an bhunchód le haghaidh coinníollacha cóipeála.  Níl baránta AR BITH ann; go fiú níl baránta ann d'INDÍOLTACHT nó FEILIÚNACHT DO FHEIDHM AR LEITH, an oiread atá ceadaithe de réir dlí."
 	echo "</i></p>"
-else
-	if [ "${1}" = "--html" ]
+}
+
+tmx()
+{
+echo "$@" | ${LIBEXECPATH}/mivec "${MAXHITS}" | iconv -f iso88591 -t utf8
+}
+
+html()
+{
+FILTERED=`echo "$@" | ${LIBEXECPATH}/commontok | tr "\n" "_" | sed 's/_/\\\\\\|/g' | sed 's/^/\\\\\\(/; s/..$/\\\\\\)/'`
+echo "$@" | ${LIBEXECPATH}/mivec "${MAXHITS}" | xmltohtml "${FILTERED}"
+echo "<hr>"
+}
+
+MUTATER=cat
+ACTION=tmx
+while [ ${1%%[^-]*} ]
+do
+	if echo "${1}" | grep "=" > /dev/null
 	then
-		shift
-                FILTERED=`echo "$@" | ${LIBEXECPATH}/commontok | tr "\n" "_" | sed 's/_/\\\\\\|/g' | sed 's/^/\\\\\\(/; s/..$/\\\\\\)/'`
-		echo "$@" | /usr/local/libexec/mivec | xmltohtml "${FILTERED}"
-		echo "<hr>"
+		JUSTOPT=`echo "${1}" | sed 's/=.*//'`
+		OPTARG=`echo "${1}" | sed 's/^[^=]*=//'`
+		case "${JUSTOPT}" in
+		"--max" )
+			MAXHITS="${OPTARG}"
+		;;
+		"--version" | "--html" | "--mutate" )
+			echo "Unnecessary argument: ${1}" >&2
+			exit 1
+		;;
+		* )
+			echo "Unrecognized option: ${1}" >&2
+			exit 1
+		;;
+		esac
+
 	else
-		echo "$@" | /usr/local/libexec/mivec | iconv -f iso88591 -t utf8
+		case "${1}" in
+		"--html" )
+			ACTION=html
+		;;
+		"--mutate" )
+			MUTATER=mutate
+		;;
+		"--version" )
+			versionout
+			exit 0
+		;;
+		* )
+			echo "Unrecognized option: ${1}" >&2
+			exit 1
+		;;
+		esac
 	fi
-fi
+	shift
+done
+${ACTION} "$@"
