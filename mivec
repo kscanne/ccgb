@@ -1,41 +1,7 @@
 #!/bin/bash
-# like mivectors but tweaked a bit to deal with filenames, etc.
-
-DATAPATH=/usr/local/share/corpas
 LIBEXECPATH=/usr/local/libexec
-
-BDCHARS="A-Za-z¡…Õ”⁄·ÈÌÛ˙"
-INTCHARS="'-"
+DATAPATH=/usr/local/share/corpas
 MAXHITS=250
-
-tokenize()
-{
-tr -s "[:space:]" "\n" |
-sed "
-s/[${BDCHARS}][${BDCHARS}${INTCHARS}]*/<c>&<\/c>/g;
-s/\([${INTCHARS}][${INTCHARS}]*\)<\/c>/<\/c>\1/g;
-" |
-sed "
-s/<c>/\n/g
-s/<\/c>/\n/g
-" | grep "[${BDCHARS}]"
-}
-
-prep()
-{
-	grep ' ' huge.txt | sed 's/^[^ ]* //'
-}
-
-# filter -- input stream is the list of corpus words to be grepped out
-# of corpus and line numbers stored in veic.db
-storail()
-{
-while read patrun
-do
-	( echo "${patrun}"; grep -i -w "${patrun}" huge.txt | sed 's/ .*//') |
-	sed -n 'H; ${x; s/\n/ /g; p}' | sed 's/^ //'
-done
-}
 
 # takes a stream of line numbers and for each one
 # echoes it, but also prints it's "foil" either with "-b" or without.
@@ -58,32 +24,16 @@ faigh()
 {
  TERMS=`cat`
  REGEXP=`echo "${TERMS}" | tr "\n" "_" | sed 's/_/\\\\\\|/g' | sed 's/^/\\\\\\(/; s/..$/\\\\\\)/'`
- echo "${TERMS}" | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/veicteoir.db | tr " " "\n" | grep '.' | sort | uniq -c | sort -r -n | sed 's/^ *[0-9]* //' | head -n "${MAXHITS}" | doublygood | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db | sed 'N; s/\n/<br><br>/' | sed "s/${REGEXP}/<b class=\"gramadoir\">&<\/b>/gI" | sed 's/^/<br>/; s/$/<br><hr>/'
+ echo "${TERMS}" | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/veicteoir.db | tr " " "\n" | grep '.' | sort | uniq -c | sort -r -n | sed 's/^ *[0-9]* //' | head -n "${MAXHITS}" | doublygood | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db | sed 's/.*/<tuv xml:lang="en">\n<seg>&<\/seg>\n<\/tuv>/' | sed 'N; N; N; N; N; s/.*/<tu>\n&\n<\/tu>/' | sed '/^<seg>/{s/^<seg> */<seg>/; s/ *<\/seg>$/<\/seg>/}'
+# | sed "s/${REGEXP}/<b class=\"gramadoir\">&<\/b>/gI" | sed 's/^/<br>/; s/$/<br><hr>/'
 }
 
-
-if [ $# -ne 1 ]
-then
-	echo "Usage: mivec [-t|-s]"
-	exit 1
-fi
-PREPROCESS=""
-PROCESSOR=""
-if [ "${1}" = "-s" ]
-then
-	PROCESSOR="faigh"
-	PREPROCESS="cat"
-else
-	if [ "${1}" = "-t" ]
-	then
-		PROCESSOR="storail"
-		PREPROCESS="prep"
-	fi
-fi
-if [ -z ${PROCESSOR} ]
-then
-	echo "Usage: mivec [-t|-s]"
-	exit 1
-fi
-
-${PREPROCESS} | tokenize | tr "[:upper:]" "[:lower:]" | grep '..' | grep -v -x -f ${DATAPATH}/stoplist  | sort -u  | ${PROCESSOR}
+echo '<?xml version="1.0"?>'
+echo '<!DOCTYPE tmx SYSTEM "http://www.lisa.org/tmx/tmx14.dtd">'
+echo '<tmx version="1.4">'
+echo '<header creationtool="CCGB" creationtoolversion="0.01" segtype="block" o-tmf="none" adminlang="en-us" srclang="en" datatype="plaintext">'
+echo '</header>'
+echo '<body>'
+${LIBEXECPATH}/commontok | faigh
+echo '</body>'
+echo '</tmx>'

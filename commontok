@@ -1,0 +1,19 @@
+#!/bin/bash
+
+DATAPATH=/usr/local/share/corpas
+BDCHARS="A-Za-z¡…Õ”⁄·ÈÌÛ˙"
+INTCHARS="'-"
+
+tr -s "[:space:]" "\n" |
+sed "
+s/[${BDCHARS}][${BDCHARS}${INTCHARS}]*/<c>&<\/c>/g;
+s/\([${INTCHARS}][${INTCHARS}]*\)<\/c>/<\/c>\1/g;
+" |
+sed "
+s/<c>/\n/g
+s/<\/c>/\n/g
+" | grep "[${BDCHARS}]" |
+tr "[:upper:]" "[:lower:]" |
+grep '..' |
+grep -v -x -f ${DATAPATH}/stoplist |
+sort -u
