@@ -1,10 +1,15 @@
 #!/bin/bash
-# filter -- input stream is the list of corpus words to be grepped out
-# of corpus and line numbers stored in veic.db
+#   Used in makefile to make veicteoir.db
+#
+#  Used to be a filter, now relies on huge.txt being in pwd.
+#   Not installed as part of package, only used for development
+#
 # N.B. the "egrep" will index words like "ábhar" when it appears in
 # the corpus as "d'ábhar", or "organisation" when it is really "organisation's"
 #  This seems fine for now; otherwise just have to kill the -w and make
 #  the search pattern a bit fancier.
+#
+#   Similarly, not indexing  "príomha--" at end of line as it stands.
 #  Disallowing a match at beginning of line is OK since that is just the
 #  document abbreviation (else get a lot of "eoin"'s)
 
