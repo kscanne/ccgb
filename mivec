@@ -2,29 +2,6 @@
 LIBEXECPATH=/usr/local/libexec
 DATAPATH=/usr/local/share/corpas
 
-# words come in one per line, lowercase, etc.
-mutate()
-{
-while read x
-do
-	echo "${x}"
-	echo "${x}" | 
-sed -n 's/^[aeiouáéíóú].*$/n-&\
-t-&\
-n&\
-t&\
-h&/p'
-	echo "${x}" | sed -n "s/^\([bcdfgmpst]\)\([^h'-]\)/\1h\2/p"
-	echo "${x}" | sed -n 's/^b[^h]/m&/p'
-	echo "${x}" | sed -n 's/^c[^h]/g&/p'
-	echo "${x}" | sed -n "s/^[dg][^h']/n&/p"
-	echo "${x}" | sed -n "s/^f[^h]/bh&/p"
-	echo "${x}" | sed -n "s/^p[^h]/b&/p"
-	echo "${x}" | sed -n "s/^s[aeiouáéíóúlnr]/t&/p"
-	echo "${x}" | sed -n "s/^t[^h]/d&/p"
-done
-}
-
 # takes a stream of line numbers and for each one
 # echoes it, but also prints it's "foil" either with "-b" or without.
 doublygood()
