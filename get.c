@@ -5,18 +5,18 @@
 #include <db.h>
 
 int
-main (int argc, char* argv[])
+main (int argc, char *argv[])
 {
   DB *dbp;
   DBT key, data;
-  int ret,len,t_ret;
+  int ret, len, t_ret;
   char token[1024];
 
   if (argc != 2)
-  {
-   fprintf(stderr, "Usage: ppfaigh dbfile\n");
-   exit (1);
-  }
+    {
+      fprintf (stderr, "Usage: ppfaigh dbfile\n");
+      exit (1);
+    }
 
   if ((ret = db_create (&dbp, NULL, 0)) != 0)
     {
@@ -34,24 +34,25 @@ main (int argc, char* argv[])
     {
       memset (&key, 0, sizeof (key));
       memset (&data, 0, sizeof (data));
-      len=strlen(token);
-      token[len-1]=0;
-      key.size = len;  // includes null
+      len = strlen (token);
+      token[len - 1] = 0;
+      key.size = len;		// includes null
       key.data = token;
-      if ((ret = dbp->get (dbp, NULL, &key, &data, 0)) == 0) {
-	 printf ("%s\n", (char *) data.data);
+      if ((ret = dbp->get (dbp, NULL, &key, &data, 0)) == 0)
+	{
+	  printf ("%s\n", (char *) data.data);
 	}
       else
 	{
-//	 fprintf(stderr, "Could not find key %s\n", key.data);
-//	 dbp->err (dbp, ret, "DB->get");
-//	 goto err;
-         ;
+//       fprintf(stderr, "Could not find key %s\n", key.data);
+//       dbp->err (dbp, ret, "DB->get");
+//       goto err;
+	  ;
 	}
     }
 
-  err: 
-   if ((t_ret = dbp->close (dbp, 0)) != 0 && ret == 0)
+err:
+  if ((t_ret = dbp->close (dbp, 0)) != 0 && ret == 0)
     ret = t_ret;
   exit (ret);
 }
