@@ -1,6 +1,15 @@
 #!/bin/bash
+#
+#   Only called by "qq".   Thus this ends up in libexec and not in bin.
+#    
+#  Usage:  mivec MAXHITS (cat|mutate)     <-- usual usage for search
+#                                             search terms come in on stdin
+#    or    mivec FILENAME                 <--  dumps whole file as TMX 
+#
+#
 LIBEXECPATH=/usr/local/libexec
 DATAPATH=/usr/local/share/corpas
+
 
 # takes a stream of line numbers and for each one
 # echoes it, but also prints it's "foil" either with "-b" or without.
@@ -18,16 +27,31 @@ do
 done
 }
 
-# main filter -- input stream is the list of search terms (one per line)
-faigh()
+xml_start()
 {
- TERMS=`cat`
- echo "<note>Results of search for \"`echo "${TERMS}" | tr "\n" " "`\"</note>" | sed 's/ "<\/note>/"<\/note>/'
+echo '<?xml version="1.0"?>'
+echo '<!DOCTYPE tmx SYSTEM "http://www.lisa.org/tmx/tmx14.dtd">'
+echo '<tmx version="1.4">'
+echo '<header creationtool="CCGB" creationtoolversion="0.01" segtype="block" o-tmf="none" adminlang="en-us" srclang="en" datatype="plaintext">'
+}
+
+xml_end()
+{
+echo '</body>'
+echo '</tmx>'
+}
+
+header_to_body_transition()
+{
  echo "<note>Irish-English parallel corpus created by Kevin Scannell</note>"
  echo "<note>See http://borel.slu.edu/corpas/ for more information, including the index of document abbreviations.</note>"
  echo '</header>'
  echo '<body>'
- echo "${TERMS}" | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/veicteoir.db n | tr " " "\n" | grep '.' | sort | uniq -c | sort -r -n | sed 's/^ *[0-9]* //' | head -n "${MAXHITS}" | doublygood | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db y | 
+}
+
+# filter -- takes pairs of sentences on stdin and output them in tmx markup
+sentences_into_tmx()
+{
 sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g' |
 sed '
 N
@@ -42,12 +66,29 @@ s/ *<\/seg>$/<\/seg>/
 '
 }
 
-MAXHITS="${1}"
-MUTATER="${2}"
-echo '<?xml version="1.0"?>'
-echo '<!DOCTYPE tmx SYSTEM "http://www.lisa.org/tmx/tmx14.dtd">'
-echo '<tmx version="1.4">'
-echo '<header creationtool="CCGB" creationtoolversion="0.01" segtype="block" o-tmf="none" adminlang="en-us" srclang="en" datatype="plaintext">'
-${LIBEXECPATH}/commontok | "${MUTATER}" | faigh
-echo '</body>'
-echo '</tmx>'
+# main filter -- input stream is the list of search terms (one per line)
+faigh()
+{
+ TERMS=`cat`
+ echo "<note>Results of search for \"`echo "${TERMS}" | tr "\n" " "`\"</note>" | sed 's/ "<\/note>/"<\/note>/'
+ header_to_body_transition
+ echo "${TERMS}" | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/veicteoir.db n | tr " " "\n" | grep '.' | sort | uniq -c | sort -r -n | sed 's/^ *[0-9]* //' | head -n "${MAXHITS}" | doublygood | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db y | 
+ sentences_into_tmx
+}
+
+if [ $# -eq 2 ]
+then
+	MAXHITS="${1}"
+	MUTATER="${2}"
+	xml_start
+	${LIBEXECPATH}/commontok | "${MUTATER}" | faigh
+	xml_end
+elif [ $# -eq 1 ]
+then
+#	xml_start
+#	header_to_body_transition
+	cat ${HOME}/gaeilge/diolaim/comp/${1} | sed 's/: .*//' | sed "s/^/${1}:/" | doublygood | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db y | sentences_into_tmx
+#	xml_end
+else
+	echo "mivec: Usage error."
+fi
