@@ -25,10 +25,11 @@ my %lenhash;
 my @focloir;
 my $N = 0;
 my $en_tagger = new Lingua::EN::Tagger;
+my $corpaspath = '/usr/local/share/corpas';
 
-my $vdb = tie %veic, "DB_File", "/usr/local/share/corpas/veicteoir.db", O_RDONLY, 0644, $DB_HASH || die $!;
-my $cdb = tie %corpas, "DB_File", "/usr/local/share/corpas/mor.db", O_RDONLY, 0644, $DB_HASH || die $!;
-open (STOPS, '/usr/local/share/corpas/stoplist');
+my $vdb = tie %veic, "DB_File", "$corpaspath/veicteoir.db", O_RDONLY, 0644, $DB_HASH || die $!;
+my $cdb = tie %corpas, "DB_File", "$corpaspath/mor.db", O_RDONLY, 0644, $DB_HASH || die $!;
+open (STOPS, "$corpaspath/stoplist");
 while (<STOPS>) {
 	chomp;
 	$stoplist{$_}++;
@@ -50,7 +51,7 @@ close FREQFILE;
 foreach (keys %freqhash) {
 	$freqhash{$_} = 1 - $freqhash{$_}/$N;
 }
-open (LENFILE, '/home/kps/gaeilge/corpas/corpas/lengths.txt') or die "Error opening sentence length file: $!\n";
+open (LENFILE, "$corpaspath/lengths.txt") or die "Error opening sentence length file: $!\n";
 while (<LENFILE>) {
 	chomp;
 	my ($tag,$len) = split;
@@ -139,7 +140,7 @@ sub get_focloir_hitz
 	print OUTPUT "English-Irish dictionary\n";
 	my @hitz;
 	foreach my $word (keys %currentlemmas) {
-		push @hitz, grep(/^$word  /, @focloir);
+		push @hitz, grep(/^$word  /i, @focloir);
 	}
 	print OUTPUT $_ foreach (sort @hitz);
 	close OUTPUT;
@@ -151,6 +152,8 @@ sub get_best_corpus_hitz
 {
 	my %candidates;
 	foreach my $word (keys %currentlemmas) {
+		my $prob = 1 - 1/$N;
+		$prob = $freqhash{$word} if (exists($freqhash{$word}));
 		$word =~ s/$/\x{000}/;
 		if (exists($veic{$word})) {
 			my $vec = $veic{$word};
@@ -159,8 +162,6 @@ sub get_best_corpus_hitz
 	                my @engtags = grep(/-b:/, @tags);
 			my %tags;
 			$tags{$_}++ foreach (@engtags);  # must make unique!
-			my $prob = 1 - 1/$N;
-			$prob = $freqhash{$word} if (exists($freqhash{$word}));
 			foreach my $tag (keys %tags) {
 				if ($lenhash{$tag} == 0) {
 					print STDERR "Warning: word $word apparently found in sentence with no words or stopwords only: $tag\n";
@@ -176,17 +177,18 @@ sub get_best_corpus_hitz
 	my $count = 1;
 	open OUTPUT, ">/tmp/fuzzies.po";
 	foreach my $en (sort {$candidates{$b} <=> $candidates{$a}} keys %candidates) {
-		print OUTPUT "#: >>F$count<< ($en)\n";
+		print OUTPUT "#: >>F$count<< ($en)";
+		printf OUTPUT " E=%.3f\n", $candidates{$en};
 		$en =~ s/$/\x{000}/;
 		my $temp = $corpas{$en};
-		$temp =~ s/([^\\])"/$1\\"/g;
+		$temp =~ s/(^|[^\\])"/$1\\"/g;
 		$temp =~ s/^/msgid "/;
 		$temp =~ s/.$/"/;
 		print OUTPUT "$temp\n";
 		my $ga = $en;
 		$ga =~ s/-b:/:/;
 		$temp = $corpas{$ga};
-		$temp =~ s/([^\\])"/$1\\"/g;
+		$temp =~ s/(^|[^\\])"/$1\\"/g;
 		$temp =~ s/^/msgstr "/;
 		$temp =~ s/.$/"/;
 		print OUTPUT "$temp\n";
@@ -201,16 +203,15 @@ sub vim_translate
 my ($id) = @_;
 my $stripped = $id;
 $stripped =~ s/[&~]//g;
+$stripped =~ s/"_:[^"]*\\n"/""/;  # KDE comments in msgid
 $stripped =~ s/\\.//g;
-$stripped =~ s/[:<>\/]/ /g;
+$stripped =~ s/[=:<?*>_\/+]/ /g;
 $stripped =~ s/^msgid //;
 lemmatize($stripped);
 get_best_corpus_hitz();
 get_focloir_hitz();
 open OUTPUT, ">/tmp/toedit.po";
-print OUTPUT "$id\n";
-$id =~ s/^msgid/msgstr/;
-print OUTPUT "$id\n";
+print OUTPUT "$id\nmsgstr \"\"\n";
 close OUTPUT;
 system 'vim -u /home/kps/.poeditrc -n /tmp/toedit.po';
 open INPUT, "</tmp/toedit.po";
@@ -227,13 +228,13 @@ while (<INPUT>) {
 	else {
 		if ($msgstr_started) {
 			s/^ *"//;
-			s/"\s*//;
+			s/"\s*$//;
 			$ans .= $_;
 		}
 	}
 }
-$ans =~ s/$/"/;
 close INPUT;
+$ans =~ s/$/"/ if $ans;
 return $ans;
 }
 
@@ -242,45 +243,40 @@ return $ans;
 # hopefully translated msgstr
 sub translate_me
 {
-my ($msg) = @_;
-print $msg->dump;
-my $i='x';
-while ($i =~ /^[^1234]/) {
-	$i=userinput('(1)translate,(2)skip,(3)copy msgid,(4)exit');
-}
-if ($i =~ m/^1/) {
+	my ($msg) = @_;
 	my $clean_id = $msg->dump;
 	$clean_id =~ s/^.*\nmsgid "/msgid "/s;
 	$clean_id =~ s/\nmsgstr ".*//s;
 	my $temp = vim_translate($clean_id);
-	$msg->msgstr($msg->dequote($temp));
+	if ($temp) {
+		$msg->msgstr($msg->dequote($temp));
+	}
+	else {
+		$done_p = 'true';
+	}
 	return 1;
 }
-elsif ($i =~ m/^2/) {
-	1;  # do nothing
-}
-elsif ($i =~ m/^3/) {
-	$msg->msgstr($msg->dequote($msg->msgid()));
-}
-elsif ($i =~ m/^4/) {
-	$done_p = 'true';
-}
-return 0;
-}
 
+my $toskip=0;
 
 #### MAIN STARTS HERE #####
 while ($ARGV = shift @ARGV) {
+	if ($ARGV =~ m/^\+([0-9]+)/) {
+		$toskip = $1;
+		next;
+	}
 	my $aref;
 {
 
 	local $SIG{__WARN__} = 'my_warn';
 	$aref = Locale::PO->load_file_asarray($ARGV);
 }
+	my $counter = 0;
 	foreach my $msg (@$aref) {
 		my $id = $msg->msgid();
 		my $str = $msg->msgstr();
-		if (defined($id) && defined($str)) {
+		$counter++;
+		if (defined($id) && defined($str) && $counter > $toskip) {
 			if ($str and $id) {
 				if ($str eq '""') {
 					Locale::PO->save_file_fromarray('/tmp/temp.po',$aref) if (translate_me($msg));
