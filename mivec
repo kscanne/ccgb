@@ -1,7 +1,6 @@
 #!/bin/bash
 LIBEXECPATH=/usr/local/libexec
 DATAPATH=/usr/local/share/corpas
-MAXHITS=250
 
 # takes a stream of line numbers and for each one
 # echoes it, but also prints it's "foil" either with "-b" or without.
@@ -42,6 +41,7 @@ s/ *<\/seg>$/<\/seg>/
 '
 }
 
+MAXHITS="${1}"
 echo '<?xml version="1.0"?>'
 echo '<!DOCTYPE tmx SYSTEM "http://www.lisa.org/tmx/tmx14.dtd">'
 echo '<tmx version="1.4">'
