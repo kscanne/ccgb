@@ -6,7 +6,7 @@ libexecdir = $(exec_prefix)/libexec
 datadir = $(prefix)/share
 pkgdatadir = $(datadir)/corpas
 
-PARADIR = ${HOME}/gaeilge/diolaim/comp2
+PARADIR = ${HOME}/gaeilge/diolaim/comp
 THISDIR = ${HOME}/gaeilge/corpas/corpas
 INSTALL = /bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
@@ -47,10 +47,7 @@ huge.txt : $(PARADIR)
 
 veicteoir.db : pptog huge.txt
 	rm -f veicteoir.db
-	bash mivec -t | pptog veicteoir.db
-
-v.txt : huge.txt mivec
-	bash mivec -t > v.txt
+	mivec -t | pptog veicteoir.db
 
 op.o : op.c
 	gcc -c op.c
