@@ -32,8 +32,8 @@ storail()
 {
 while read patrun
 do
-	answer=`grep -i -w "${patrun}" huge.txt | sed 's/ .*//' | sed '$!N' | tr "\n" " "`
-	echo "${patrun} ${answer}"
+	( echo "${patrun}"; grep -i -w "${patrun}" huge.txt | sed 's/ .*//') |
+	sed -n 'H; ${x; s/\n/ /g; p}' | sed 's/^ //'
 done
 }
 
@@ -53,8 +53,7 @@ do
 done
 }
 
-# filter -- input stream is the list of search terms and output 
-# is the list of line numbers 
+# main filter -- input stream is the list of search terms (one per line)
 faigh()
 {
  TERMS=`cat`
