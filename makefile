@@ -65,6 +65,7 @@ ppfaigh : get.o
 
 installweb :
 	$(INSTALL_DATA) index.html $(webhome)
+	$(INSTALL_DATA) ll.html $(webhome)
 	$(INSTALL_PROGRAM) cc.cgi /home/httpd/cgi-bin
 	$(INSTALL_PROGRAM) ccweb /usr/local/bin
 
