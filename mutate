@@ -1,18 +1,26 @@
 #!/bin/bash
 #  with -d flag, unmutates words on input stream (one for one)
 #  without it, it adds all conceivable mutations.
+#
+#  Convention: if input words are normalized by commontok,
+#  so should be the output words...
+#   in particular, -d shouldn't produce any one letter words?
+#
+#  The other critical convention is that if I take an arbitrary
+#  word, then unmutate it, then mutate it, the original word had
+#  better be among the output!
 
 if [ "${1}" = "-d" ]
 then
 	sed "/^.['-]$/d" | sed "s/^.['-]//" |
 	sed '
-s/^bh\([fF]\)/\1/
-s/^m\([bB]\)/\1/
-s/^g\([cC]\)/\1/
-s/^n\([dDgGAEIOU¡…Õ”⁄]\)/\1/
-s/^b\([pP]\)/\1/
-s/^t\([sS]\)/\1/
-s/^d\([tT]\)/\1/
+s/^bh\([fF].\)/\1/
+s/^m\([bB].\)/\1/
+s/^g\([cC].\)/\1/
+s/^n\([dDgGAEIOU¡…Õ”⁄].\)/\1/
+s/^b\([pP].\)/\1/
+s/^t\([sS].\)/\1/
+s/^d\([tT].\)/\1/
 ' | sed '
 /^.[^h]/{p; d}
 /^[Bb]hur$/{p; d}
@@ -32,10 +40,10 @@ s/^d\([tT]\)/\1/
 /^[Tt]hoir$/{p; d}
 /^[Tt]huaidh$/{p; d}
 /^[Tt]huas$/{p; d}
-s/^\([BCDFGMPSTbcdfgmpst]\)h/\1/
+s/^\([BCDFGMPSTbcdfgmpst]\)h\(.\)/\1\2/
 ' |
 sed '
-/^[^h]/{p; d}
+/^[^h]./{p; d}
 /^haema/{p; d}
 /^halla/{p; d}
 /^hanla$/{p; d}
@@ -45,7 +53,7 @@ sed '
 /^h[Ìi]odr/{p; d}
 /^hip/{p; d}
 /^h[Ûo]ma/{p; d}
-s/^h\([aeiou·ÈÌÛ˙AEIOU¡…Õ”⁄]\)/\1/
+s/^h\([aeiou·ÈÌÛ˙AEIOU¡…Õ”⁄].\)/\1/
 '
 else
 	while read x
@@ -56,7 +64,16 @@ else
 t-&\
 n&\
 t&\
-h&/p'
+m_&\
+d_&\
+b_&\
+h&/p' | tr "_" "'"
+	echo "${x}" | sed -n 's/^f\([^h].*\)$/b_fh\1\
+m_fh\1\
+d_fh\1/p' | tr "_" "'"
+	echo "${x}" | sed -n 's/^fh.*$/b_&\
+m_&\
+d_&/p' | tr "_" "'"
 		echo "${x}" | sed -n "s/^\([bcdfgmpst]\)\([^h'-]\)/\1h\2/p"
 		echo "${x}" | sed -n 's/^b[^h]/m&/p'
 		echo "${x}" | sed -n 's/^c[^h]/g&/p'
