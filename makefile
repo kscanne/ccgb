@@ -15,15 +15,19 @@ webhome = /home/kps/public_html/corpas
 
 all : mor.db veicteoir.db ppfaigh
 
-install : all
-	$(INSTALL_DATA) mor.db $(pkgdatadir)/mor.db
-	$(INSTALL_DATA) veicteoir.db $(pkgdatadir)/veicteoir.db
-	$(INSTALL_DATA) stoplist $(pkgdatadir)/stoplist
+installbin : ppfaigh
 	$(INSTALL_PROGRAM) qq $(bindir)/qq
 	$(INSTALL_PROGRAM) mutate $(bindir)/mutate
 	$(INSTALL_PROGRAM) ppfaigh $(libexecdir)/ppfaigh
 	$(INSTALL_PROGRAM) mivec $(libexecdir)/mivec
 	$(INSTALL_PROGRAM) commontok $(libexecdir)/commontok
+	$(INSTALL_PROGRAM) quotekeep.pl $(libexecdir)/quotekeep.pl
+
+install : all
+	$(INSTALL_DATA) mor.db $(pkgdatadir)/mor.db
+	$(INSTALL_DATA) veicteoir.db $(pkgdatadir)/veicteoir.db
+	$(INSTALL_DATA) stoplist $(pkgdatadir)/stoplist
+	$(MAKE) installbin
 
 uninstall :
 	rm -f $(pkgdatadir)/mor.db
@@ -34,6 +38,7 @@ uninstall :
 	rm -f $(libexecdir)/ppfaigh
 	rm -f $(libexecdir)/mivec
 	rm -f $(libexecdir)/commontok
+	rm -f $(libexecdir)/quotekeep.pl
 
 mor.db : pptog huge.txt
 	rm -f mor.db
