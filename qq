@@ -1,10 +1,20 @@
 #!/bin/bash
 
+LIBEXECPATH=/usr/local/libexec
+
 xmltohtml()
 {
-sed -n "
+sed -n '
 /^<tu>/{
 s/.*/<hr>/
+p
+}
+/^<prop.*document.>/{
+s/<prop[^>]*>\([^<]*\)<.*/<a href="\/corpas\/ll.html">\1<\/a>:/
+p
+}
+/^<prop.*line.>/{
+s/<prop[^>]*>\([^<]*\)<.*/\1<br><br>/
 p
 }
 /^<\/tuv/{
@@ -15,9 +25,14 @@ s/<\/tuv><\/tu>/<br>/
 p
 }
 /^<seg>/{
+p
+}
+' |
+sed "
+/^<seg>/{
 s/^<seg>//
 s/<\/seg>$//
-p
+s/${FILTERED}/<b class=\"gramadoir\">&<\/b>/gI
 }
 "
 }
@@ -29,11 +44,14 @@ then
 	echo "Copyright (C) 2004 <a href=\"http://borel.slu.edu/\">Kevin P. Scannell</a><br><br>"
 	echo "<i>"
 	echo "Is saorbhogearra an ríomhchlár seo; féach ar an bhunchód le haghaidh coinníollacha cóipeála.  Níl baránta AR BITH ann; go fiú níl baránta ann d'INDÍOLTACHT nó FEILIÚNACHT DO FHEIDHM AR LEITH, an oiread atá ceadaithe de réir dlí."
-	echo "</i></p><hr>"
+	echo "</i></p>"
 else
 	if [ "${1}" = "--html" ]
 	then
-		echo "$@" | /usr/local/libexec/mivec | xmltohtml
+		shift
+                FILTERED=`echo "$@" | ${LIBEXECPATH}/commontok | tr "\n" "_" | sed 's/_/\\\\\\|/g' | sed 's/^/\\\\\\(/; s/..$/\\\\\\)/'`
+		echo "$@" | /usr/local/libexec/mivec | xmltohtml "${FILTERED}"
+		echo "<hr>"
 	else
 		echo "$@" | /usr/local/libexec/mivec | iconv -f iso88591 -t utf8
 	fi
