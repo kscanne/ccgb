@@ -1,0 +1,60 @@
+#!/bin/sh
+##  Use in the gaeilge/diolaim/comp directory.
+##   Usage: mutinfo regexp
+## e.g. % mutinfo '194*' 
+##   where the regexp matches the CCGB filenames to be included in computation
+
+
+if [ $# -ne 1 ]
+then
+	echo "Usage: mutinfo SLONN"
+	exit
+fi
+PATTERN="${1}"
+CORPUSDIR=${HOME}/gaeilge/diolaim/comp
+LIBEXECPATH=/usr/local/libexec
+DATAPATH=/usr/local/share/corpas
+cd ${CORPUSDIR}
+#echo "Here are the English files to be included in computations:"
+#ls | egrep -e "^${PATTERN}-b$" | more
+ls | egrep -e "^${PATTERN}-b$" | 
+while read enfile
+do
+	cat "${enfile}" | sed 's/^[^ ]* //' | ${LIBEXECPATH}/commontok
+done | sort -u |
+while read englishword
+do
+	echo "Searching for ${englishword}..."
+	echo "${englishword}" |
+	${LIBEXECPATH}/ppfaigh ${DATAPATH}/veicteoir.db n |
+	tr " " "\n" |
+	egrep '.' |
+	egrep "^${PATTERN}-b:" |
+	sed 's/-b:/:/' > /tmp/mutlines
+	freq=`cat /tmp/mutlines | wc -l | sed 's/^ *//'`
+	if [ ${freq} = "1" -o ${freq} = "2" -o ${freq} = "3" ]
+	then
+		continue
+	fi
+	cat /tmp/mutlines |
+	sed 's/-b:/:/' |
+	${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db n |
+ 	${LIBEXECPATH}/commontok |
+	mutate -d |
+ 	sort -u |
+	while read irishword
+	do
+		echo "${irishword}" |
+		mutate |
+		${LIBEXECPATH}/ppfaigh ${DATAPATH}/veicteoir.db n |
+		tr " " "\n" |
+		egrep '.' |
+		egrep "^${PATTERN}:" |
+		egrep -v -e '-b:' |
+		sort -u > /tmp/mutlines2
+		freq2=`cat /tmp/mutlines2 | wc -l | sed 's/^ *//'`
+		hits=`sort /tmp/mutlines /tmp/mutlines2 | uniq -c | egrep '^ *2 ' | wc -l | sed 's/^ *//'`
+		answer=`echo $hits $freq $freq2 | awk '{ printf( "%.7f\n", $1/sqrt($2*$3) ) } '`
+		echo "${answer}|${englishword}|${irishword}|${hits} ${freq} ${freq2}" | egrep "^(1|0\.[6-9])"
+	done | sort -n -r | sed 's/^\([^|]*\)|\(.*\)$/\2 \1/'
+done
