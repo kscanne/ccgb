@@ -22,6 +22,7 @@ install : all
 	$(INSTALL_PROGRAM) qq $(bindir)/qq
 	$(INSTALL_PROGRAM) ppfaigh $(libexecdir)/ppfaigh
 	$(INSTALL_PROGRAM) mivec $(libexecdir)/mivec
+	$(INSTALL_PROGRAM) commontok $(libexecdir)/commontok
 
 uninstall :
 	rm -f $(pkgdatadir)/mor.db
@@ -30,6 +31,7 @@ uninstall :
 	rm -f $(bindir)/qq
 	rm -f $(libexecdir)/ppfaigh
 	rm -f $(libexecdir)/mivec
+	rm -f $(libexecdir)/commontok
 
 mor.db : pptog huge.txt
 	rm -f mor.db
@@ -47,7 +49,7 @@ huge.txt : $(PARADIR)
 
 veicteoir.db : pptog huge.txt
 	rm -f veicteoir.db
-	$(libexecdir)/mivec -t | ./pptog veicteoir.db
+	./builder | ./pptog veicteoir.db
 
 op.o : op.c
 	gcc -c op.c
