@@ -1,0 +1,69 @@
+#!/bin/bash
+#  with -d flag, unmutates words on input stream (one for one)
+#  without it, it adds all conceivable mutations.
+
+if [ "${1}" = "-d" ]
+then
+	sed "/^.['-]$/d" | sed "s/^.['-]//" |
+	sed '
+s/^bh\([fF]\)/\1/
+s/^m\([bB]\)/\1/
+s/^g\([cC]\)/\1/
+s/^n\([dDgGAEIOU¡…Õ”⁄]\)/\1/
+s/^b\([pP]\)/\1/
+s/^t\([sS]\)/\1/
+s/^d\([tT]\)/\1/
+' | sed '
+/^.[^h]/{p; d}
+/^[Bb]hur$/{p; d}
+/^[Cc]ha$/{p; d}
+/^[Cc]ha[nr]$/{p; d}
+/^[Cc]heana$/{p; d}
+/^[Cc]homh$/{p; d}
+/^[Cc]hoÌche$/{p; d}
+/^[Tt]hairis$/{p; d}
+/^[Tt]hall$/{p; d}
+/^[Tt]har$/{p; d}
+/^[Tt]harla$/{p; d}
+/^[Tt]hart$/{p; d}
+/^[Tt]heas$/{p; d}
+/^[Tt]hiar$/{p; d}
+/^[Tt]hÌos$/{p; d}
+/^[Tt]hoir$/{p; d}
+/^[Tt]huaidh$/{p; d}
+/^[Tt]huas$/{p; d}
+s/^\([BCDFGMPSTbcdfgmpst]\)h/\1/
+' |
+sed '
+/^[^h]/{p; d}
+/^haema/{p; d}
+/^halla/{p; d}
+/^hanla$/{p; d}
+/^hata/{p; d}
+/^heitr/{p; d}
+/^hidr/{p; d}
+/^h[Ìi]odr/{p; d}
+/^hip/{p; d}
+/^h[Ûo]ma/{p; d}
+s/^h\([aeiou·ÈÌÛ˙AEIOU¡…Õ”⁄]\)/\1/
+'
+else
+	while read x
+	do
+		echo "${x}"
+		echo "${x}" | 
+	sed -n 's/^[aeiou·ÈÌÛ˙].*$/n-&\
+t-&\
+n&\
+t&\
+h&/p'
+		echo "${x}" | sed -n "s/^\([bcdfgmpst]\)\([^h'-]\)/\1h\2/p"
+		echo "${x}" | sed -n 's/^b[^h]/m&/p'
+		echo "${x}" | sed -n 's/^c[^h]/g&/p'
+		echo "${x}" | sed -n "s/^[dg][^h']/n&/p"
+		echo "${x}" | sed -n "s/^f[^h]/bh&/p"
+		echo "${x}" | sed -n "s/^p[^h]/b&/p"
+		echo "${x}" | sed -n "s/^s[aeiou·ÈÌÛ˙lnr]/t&/p"
+		echo "${x}" | sed -n "s/^t[^h]/d&/p"
+	done
+fi
