@@ -1,23 +1,39 @@
-#!/bin/bash
+#!/usr/bin/perl
 #   Used in makefile to make veicteoir.db
 #
-#  Used to be a filter, now relies on huge.txt being in pwd.
 #   Not installed as part of package, only used for development
-#
-# N.B. the "egrep" will index words like "·bhar" when it appears in
-# the corpus as "d'·bhar", or "organisation" when it is really "organisation's"
-#  This seems fine for now; otherwise just have to kill the -w and make
-#  the search pattern a bit fancier.
-#
-#   Similarly, not indexing  "prÌomha--" at end of line as it stands.
-#  Disallowing a match at beginning of line is OK since that is just the
-#  document abbreviation (else get a lot of "eoin"'s)
+use strict;
+use warnings;
 
-LIBEXECPATH=/usr/local/libexec
+use Lingua::GA::Gramadoir;
 
-grep ' ' huge.txt | sed 's/^[^ ]* //' | ${LIBEXECPATH}/commontok |
-while read patrun
-do
-	( echo "${patrun}"; LC_ALL=ga_IE egrep -i "[^a-zA-Z]${patrun}([^a-zA-Z'-]|$)" huge.txt | sed 's/ .*//') |
-	sed -n 'H; ${x; s/\n/ /g; p}' | sed 's/^ //'
-done
+binmode STDOUT, ":encoding(iso-8859-1)";
+binmode STDERR, ":encoding(iso-8859-1)";
+binmode STDIN, ":bytes";
+
+# Irish tokenizer works sufficiently well on English sentences too
+my $gr = new Lingua::GA::Gramadoir;
+
+my %alltokes;
+my %stopwords;
+
+open(STOPS, "<:bytes", 'stoplist') or die "Could not open stop word file.\n";
+while (<STOPS>) {
+	chomp;
+	$stopwords{$_}++;
+}
+close STOPS;
+
+while (<STDIN>) {
+	chomp;
+	my ( $tag, $sentence ) = m/^([^ ]+) (.*)$/;
+	my $tokes = $gr->tokenize($sentence);
+	foreach (@$tokes) {
+		if (/../) {
+			tr/A-Z¡…Õ”⁄/a-z·ÈÌÛ˙/;
+			$alltokes{$_} .=" $tag" unless (exists($stopwords{$_}));
+		}
+	}
+}
+
+print "$_$alltokes{$_}\n" foreach (keys %alltokes);
