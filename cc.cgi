@@ -10,22 +10,24 @@ $ENV{PATH}="/bin:/usr/bin";
 delete @ENV{ 'IFS', 'CDPATH', 'ENV', 'BASH_ENV' };
 
 my $SEARCHENGINE = '/usr/local/bin/ccweb';
+my @shellargs;
 my $q = new CGI;
-my( $ionchur ) = $q->param( "foirm_ionchur" ) =~ /^(['áéíóúÁÉÍÓÚ\w\s,.!?-]+)$/;
+my( $ionchur ) = $q->param( "foirm_ionchur" ) =~ /^(["'áéíóúÁÉÍÓÚ\w\s,.!?-]+)$/;
 my( $hits ) = $q->param( "hits" ) =~ /^([0-9]+)$/;
 my( $format ) = $q->param( "format" ) =~ /^([a-z]+)$/;
 
 my @allargs = $q->param;
-my $mutateflag = "--mutate";
-if ( "@allargs" !~ /mutate/){
-	$mutateflag = "";
+push @shellargs, "--max=$hits";
+push @shellargs, "--html"   if ( $format eq "html" );
+push @shellargs, "--mutate" if ( "@allargs" =~ /mutate/ );
+
+while ($ionchur =~ m/("[^"]+"|[^" ]\S+)/g) {
+	my $term = $1;
+	$term =~ s/^"//;
+	$term =~ s/"$//;
+	push @shellargs, $term;
 }
 
-my $hitflag = "--max=$hits";
-my $formflag = "--$format";
-if ( $formflag eq "--xml" ) {
-	$formflag = "";
-}
 
 local *PIPE;
 
@@ -41,7 +43,7 @@ $ionchur =~ s/'/\'/g;
 my $pid = open PIPE, "-|";
 die "Fork failed: $!" unless defined $pid;
 unless ( $pid ) {
-	     exec $SEARCHENGINE, "$hitflag", "$formflag", "$mutateflag", "$ionchur" or die "Can't open pipe: $!";
+	     exec $SEARCHENGINE, @shellargs or die "Can't open pipe: $!";
 	}
 
 print while <PIPE>;
