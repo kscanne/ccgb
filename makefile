@@ -32,6 +32,7 @@ uninstall :
 	rm -f $(libexecdir)/mivec
 
 mor.db : pptog huge.txt
+	rm -f mor.db
 	cat huge.txt | pptog mor.db
 
 clean :
@@ -45,6 +46,7 @@ huge.txt : $(PARADIR)
 	(cd $(PARADIR); egrep -H . * | sed 's/: / /' > $(THISDIR)/huge.txt)
 
 veicteoir.db : pptog huge.txt
+	rm -f veicteoir.db
 	bash mivec -t | pptog veicteoir.db
 
 v.txt : huge.txt mivec
