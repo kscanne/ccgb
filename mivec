@@ -8,6 +8,8 @@
 #
 LIBEXECPATH=/usr/local/libexec
 DATAPATH=/usr/local/share/corpas
+MUTATER=cat
+MAXHITS=250
 
 
 # takes a stream of line numbers and for each one
@@ -69,34 +71,22 @@ s/ *<\/seg>$/<\/seg>/
 # search terms (one per line); see commontok
 faigh()
 {
+ TEMPFILE=`mktemp`
  QUOTED=`for term in "$@"; do echo -n "\"$term\" "; done`
  TERMS=`cat`
  COUNT=`echo "${TERMS}" | wc -l`
  echo "<note>Results of search for ${QUOTED}</note>" | sed 's/ "<\/note>/"<\/note>/'
+ let ok_count=0
  header_to_body_transition
-echo "${TERMS}" | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/veicteoir.db n | tr " " "\n" | grep '.' | sort | uniq -c | egrep "^ *${COUNT} " | sed 's/^ *[0-9]* //' | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db y | 
-while read cand
+echo "${TERMS}" |
+while read x
 do
-	IMOK="true"
-	for term in "$@"
-	do
-		if echo "$term" | egrep ' ' > /dev/null
-		then
-			if ! echo "$cand" | egrep "$term" > /dev/null
-			then
-				IMOK="false"
-			fi
-		fi
-	done
-	if [ "$IMOK" = "true" ]
-	then
-		echo "$cand" | sed 's/ .*//'
-	fi
+	echo "${x}" | ${MUTATER} | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/veicteoir.db n | tr " " "\n" | grep '.' | sort -u
 done |
-head -n "${MAXHITS}" | doublygood |
-${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db y | 
-# echo "${TERMS}" | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/veicteoir.db n | tr " " "\n" | grep '.' | sort | uniq -c | sort -r -n | sed 's/^ *[0-9]* //' | head -n "${MAXHITS}" | doublygood | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db y | 
- sentences_into_tmx
+sort | uniq -c | egrep "^ *${COUNT} " | sed 's/^ *[0-9]* //' | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db y > ${TEMPFILE}
+${LIBEXECPATH}/quotekeep.pl "${TEMPFILE}" "${MAXHITS}" "$@" |
+doublygood | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db y | sentences_into_tmx
+ rm -f $TEMPFILE
 }
 
 if [ $# -eq 0 ]
@@ -119,7 +109,7 @@ else
 		echo "Usage error: first argument must be a positive integer (max hits)"
 		exit
 	fi
-	if ! echo "${2}" | egrep '^(cat|mutate)$' > /dev/null
+	if ! echo "${2}" | egrep '(cat|mutate)$' > /dev/null
 	then
 		echo "Usage error: second argument must be \"cat\" or \"mutate\""
 		exit
@@ -129,6 +119,6 @@ else
 	shift
 	shift
 	xml_start
-	echo "$@" | ${LIBEXECPATH}/commontok | "${MUTATER}" | faigh "$@"
+	echo "$@" | ${LIBEXECPATH}/commontok | faigh "$@"
 	xml_end
 fi
