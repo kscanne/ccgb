@@ -2,11 +2,7 @@
 
 LIBEXECPATH=/usr/local/libexec
 MAXHITS=250
-
-mutate()
-{
-cat
-}
+MUTATER=cat
 
 xmltohtml()
 {
@@ -55,17 +51,28 @@ versionout()
 
 tmx()
 {
-echo "$@" | ${LIBEXECPATH}/mivec "${MAXHITS}" | iconv -f iso88591 -t utf8
+echo "$@" | ${LIBEXECPATH}/mivec "${MAXHITS}" "${MUTATER}" | iconv -f iso88591 -t utf8
 }
 
 html()
 {
+echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN\""
+echo "\"http://www.w3.org/TR/html4/strict.dtd\">"
+echo "<html lang=\"ga\">"
+echo "<head>"
+echo "<title>Corpas Comhthreomhar Gaeilge-B&eacute;arla: Tortha&iacute;</title>"
+echo "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">"
+echo "<link rel=\"stylesheet\" href=\"http://borel.slu.edu/kps.css\" type=\"text/css\">"
+echo "</head>"
+echo "<body>"
+versionout
 FILTERED=`echo "$@" | ${LIBEXECPATH}/commontok | tr "\n" "_" | sed 's/_/\\\\\\|/g' | sed 's/^/\\\\\\(/; s/..$/\\\\\\)/'`
-echo "$@" | ${LIBEXECPATH}/mivec "${MAXHITS}" | xmltohtml "${FILTERED}"
+echo "$@" | ${LIBEXECPATH}/mivec "${MAXHITS}" "${MUTATER}" | xmltohtml "${FILTERED}"
 echo "<hr>"
+echo "</body>"
+echo "</html>"
 }
 
-MUTATER=cat
 ACTION=tmx
 while [ ${1%%[^-]*} ]
 do
