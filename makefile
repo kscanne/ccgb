@@ -13,7 +13,7 @@ INSTALL_DATA = ${INSTALL} -m 644
 INSTALL_PROGRAM = /bin/install -c
 webhome = /home/kps/public_html/corpas
 
-all : mor.db veicteoir.db ppfaigh
+all : mor.db veicteoir.db ppfaigh lengths.txt
 
 installbin : ppfaigh
 	$(INSTALL_PROGRAM) qq $(bindir)/qq
@@ -53,6 +53,9 @@ distclean :
 
 huge.txt :
 	(cd $(PARADIR); egrep -H . * | sed 's/: / /' > $(THISDIR)/huge.txt)
+
+lengths.txt :
+	(cd $(PARADIR); egrep -H . *-b | sed 's/: / /') | while read x; do echo `echo "$$x" | sed 's/ .*//'` `echo "$$x" | sed 's/^[^ ]* //' | $(libexecdir)/commontok | wc -l`; done > lengths.txt
 
 fadhbanna.txt : huge.txt
 	cat huge.txt | sed 's/ .*//' | sed 's/-b:/:/' | sort | uniq -c | egrep -v '^ *2 ' > fadhbanna.txt
