@@ -23,17 +23,29 @@ done
 faigh()
 {
  TERMS=`cat`
- REGEXP=`echo "${TERMS}" | tr "\n" "_" | sed 's/_/\\\\\\|/g' | sed 's/^/\\\\\\(/; s/..$/\\\\\\)/'`
- echo "${TERMS}" | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/veicteoir.db | tr " " "\n" | grep '.' | sort | uniq -c | sort -r -n | sed 's/^ *[0-9]* //' | head -n "${MAXHITS}" | doublygood | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db | sed 's/.*/<tuv xml:lang="en">\n<seg>&<\/seg>\n<\/tuv>/' | sed 'N; N; N; N; N; s/.*/<tu>\n&\n<\/tu>/' | sed '/^<seg>/{s/^<seg> */<seg>/; s/ *<\/seg>$/<\/seg>/}'
-# | sed "s/${REGEXP}/<b class=\"gramadoir\">&<\/b>/gI" | sed 's/^/<br>/; s/$/<br><hr>/'
+ echo "<note>Results of search for \"`echo "${TERMS}" | tr "\n" " "`\"</note>" | sed 's/ "<\/note>/"<\/note>/'
+ echo "<note>Irish-English parallel corpus created by Kevin Scannell</note>"
+ echo "<note>See http://borel.slu.edu/corpas/ for more information, including the index of document abbreviations.</note>"
+ echo '</header>'
+ echo '<body>'
+ echo "${TERMS}" | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/veicteoir.db n | tr " " "\n" | grep '.' | sort | uniq -c | sort -r -n | sed 's/^ *[0-9]* //' | head -n "${MAXHITS}" | doublygood | ${LIBEXECPATH}/ppfaigh ${DATAPATH}/mor.db y | 
+sed '
+N
+/^[^:]*-b:/s/^\([^:]*\):\([^ ]*\) \(.*\)\n\([^ ]*\) \([^\n]*\)/<tu>\n<prop type="document">\1<\/prop>\n<prop type="line">\2<\/prop>\n<tuv xml:lang="en">\n<seg>\3<\/seg>\n<\/tuv>\n<tuv xml:lang="ga">\n<seg>\5<\/seg>\n<\/tuv>\n<\/tu>/
+/^[^:\n]*:/s/^\([^:]*\):\([^ ]*\) \([^\n]*\)\n\([^ ]*\) \([^\n]*\)/<tu>\n<prop type="document">\1<\/prop>\n<prop type="line">\2<\/prop>\n<tuv xml:lang="ga">\n<seg>\3<\/seg>\n<\/tuv>\n<tuv xml:lang="en">\n<seg>\5<\/seg>\n<\/tuv>\n<\/tu>/
+' | 
+sed '
+/^<seg>/{
+s/^<seg> */<seg>/
+s/ *<\/seg>$/<\/seg>/
+}
+'
 }
 
 echo '<?xml version="1.0"?>'
 echo '<!DOCTYPE tmx SYSTEM "http://www.lisa.org/tmx/tmx14.dtd">'
 echo '<tmx version="1.4">'
 echo '<header creationtool="CCGB" creationtoolversion="0.01" segtype="block" o-tmf="none" adminlang="en-us" srclang="en" datatype="plaintext">'
-echo '</header>'
-echo '<body>'
 ${LIBEXECPATH}/commontok | faigh
 echo '</body>'
 echo '</tmx>'
