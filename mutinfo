@@ -1,7 +1,10 @@
 #!/bin/bash
 
 # Usage:  $ ./mutinfo
-#   and it produces two files  SEAN.mutual.txt and NUA.mutual.txt
+#   and it produces three files:
+#   SEAN.mutual.txt (Eng-Ir lexicon induced from mutual info on pre '44 corpus)
+#   NUA.mutual.txt (Eng-Ir lexicon induced from mutual info on post '44 corpus)
+#   UPDATE.txt   (list of spelling updates by merging previous two)
 
 CORPUSDIR=${HOME}/gaeilge/diolaim/comp
 LIBEXECPATH=/usr/local/libexec
@@ -40,3 +43,5 @@ rm -f ${TEMPBEARLA} ${TEMPGAEILGE}
 
 do_it '19([23][0-9]|4[0-3]).*' > SEAN.mutual.txt
 do_it '19([5-9][0-9]|4[5-9]).*' > NUA.mutual.txt
+perl report.pl SEAN.mutual.txt NUA.mutual.txt | sort > ALLUPDATES.txt
+cat ALLUPDATES.txt | egrep -v '^([^ ]+) -> \1 \(' > UPDATES.txt
