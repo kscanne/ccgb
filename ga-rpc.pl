@@ -32,26 +32,9 @@ sub corpas {
         return $toclient;
 }
     
-sub gramadoir {
-	my $GRAMADOIR = '/usr/local/bin/grxml';
-	my $ionchur = "@_";
-	$ionchur =~ s/'/\'/g;
-	local *PIPE;
-	my $pid = open PIPE, "-|";
-	die "Fork failed: $!" unless defined $pid;
-	unless ( $pid ) {
-		exec $GRAMADOIR, "$ionchur" or die "Can't open pipe: $!";
-	}
-	my @alloutput = <PIPE>;
-	my $toclient = "@alloutput";
-	$toclient =~ s/^ //gm;
-	from_to($toclient, "iso-8859-1", "utf-8"); 	
-	close PIPE;
-        return $toclient;
 }
     
-$methods = {'gaeilge.gramadoir' => \&gramadoir,
-            'gaeilge.corpas' => \&corpas
+$methods = {'gaeilge.corpas' => \&corpas
 	    };
 Frontier::Daemon->new(LocalPort => 8080, methods => $methods)
      or die "Couldn't start HTTP server: $!";
