@@ -4,16 +4,6 @@
 #include <string.h>
 #include <db.h>
 
-void
-cleanup (DB * dbp, int ret)
-{
-  int t_ret;
-
-  if ((t_ret = dbp->close (dbp, 0)) != 0 && ret == 0)
-    ret = t_ret;
-  exit (ret);
-}
-
 int
 main (int argc, char *argv[])
 {
@@ -38,7 +28,7 @@ main (int argc, char *argv[])
        dbp->open (dbp, NULL, argv[1], NULL, DB_HASH, DB_CREATE, 0664)) != 0)
     {
       dbp->err (dbp, ret, "%s", argv[1]);
-      cleanup (dbp, ret);
+      goto err;
     }
 
   while (fgets (token, 65535, stdin) != NULL)
@@ -82,11 +72,13 @@ main (int argc, char *argv[])
       else
 	{
 	  dbp->err (dbp, ret, "DB->put");
-	  cleanup (dbp, ret);
+	  goto err;
 	}
       free (key.data);
       free (data.data);
     }
 
-  cleanup (dbp, ret);
+  err: if ((t_ret = dbp->close (dbp, 0)) != 0 && ret == 0)
+    ret = t_ret;
+  exit (ret);
 }
