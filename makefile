@@ -42,14 +42,17 @@ clean :
 
 distclean :
 	$(MAKE) clean
-	rm -f veicteoir.db mor.db huge.txt
+	rm -f veicteoir.db mor.db huge.txt veicteoir.txt
 
-huge.txt : $(PARADIR)
+huge.txt :
 	(cd $(PARADIR); egrep -H . * | sed 's/: / /' > $(THISDIR)/huge.txt)
 
-veicteoir.db : pptog huge.txt
+veicteoir.txt : huge.txt
+	./builder > veicteoir.txt
+
+veicteoir.db : pptog veicteoir.txt
 	rm -f veicteoir.db
-	./builder | ./pptog veicteoir.db
+	cat veicteoir.txt | ./pptog veicteoir.db
 
 op.o : op.c
 	gcc -c op.c
