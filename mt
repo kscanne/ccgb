@@ -305,6 +305,7 @@ while ($ARGV = shift @ARGV) {
 			print "File unchanged.\n";
 		}
 	}
+	print "Restart with \"$0 +$counter $ARGV\"\n";
 }
 
 # untie %corpas;
