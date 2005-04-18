@@ -7,6 +7,7 @@ datadir = $(prefix)/share
 pkgdatadir = $(datadir)/corpas
 
 PARADIR = ${HOME}/gaeilge/diolaim/comp
+LENDIR = ${HOME}/gaeilge/diolaim/complen
 THISDIR = ${HOME}/gaeilge/corpas/corpas
 INSTALL = /bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
@@ -18,25 +19,32 @@ all : mor.db veicteoir.db ppfaigh lengths.txt
 installbin : ppfaigh
 	$(INSTALL_PROGRAM) qq $(bindir)/qq
 	$(INSTALL_PROGRAM) mutate $(bindir)/mutate
+	$(INSTALL_PROGRAM) mt $(bindir)/mt
 	$(INSTALL_PROGRAM) ppfaigh $(libexecdir)/ppfaigh
 	$(INSTALL_PROGRAM) mivec $(libexecdir)/mivec
+	$(INSTALL_PROGRAM) ccxml $(libexecdir)/ccxml
 	$(INSTALL_PROGRAM) commontok $(libexecdir)/commontok
 	$(INSTALL_PROGRAM) quotekeep.pl $(libexecdir)/quotekeep.pl
+	$(INSTALL) -m 444 poeditrc $(HOME)/.poeditrc
 
 install : all
 	$(INSTALL_DATA) mor.db $(pkgdatadir)/mor.db
 	$(INSTALL_DATA) veicteoir.db $(pkgdatadir)/veicteoir.db
 	$(INSTALL_DATA) stoplist $(pkgdatadir)/stoplist
+	$(INSTALL_DATA) lengths.txt $(pkgdatadir)/lengths.txt
 	$(MAKE) installbin
 
 uninstall :
 	rm -f $(pkgdatadir)/mor.db
 	rm -f $(pkgdatadir)/veicteoir.db
 	rm -f $(pkgdatadir)/stoplist
+	rm -f $(pkgdatadir)/lengths.txt
 	rm -f $(bindir)/qq
 	rm -f $(bindir)/mutate
+	rm -f $(bindir)/mt
 	rm -f $(libexecdir)/ppfaigh
 	rm -f $(libexecdir)/mivec
+	rm -f $(libexecdir)/ccxml
 	rm -f $(libexecdir)/commontok
 	rm -f $(libexecdir)/quotekeep.pl
 
@@ -54,8 +62,9 @@ distclean :
 huge.txt :
 	(cd $(PARADIR); egrep -H . * | sed 's/: / /' > $(THISDIR)/huge.txt)
 
-lengths.txt :
-	(cd $(PARADIR); egrep -H . *-b | sed 's/: / /') | while read x; do echo `echo "$$x" | sed 's/ .*//'` `echo "$$x" | sed 's/^[^ ]* //' | $(libexecdir)/commontok | wc -l`; done > lengths.txt
+lengths.txt : FORCE
+	find $(PARADIR) -name '*-b' | xargs perl lenupdate
+	(cd $(LENDIR); egrep -H . *) > lengths.txt
 
 fadhbanna.txt : huge.txt
 	cat huge.txt | sed 's/ .*//' | sed 's/-b:/:/' | sort | uniq -c | egrep -v '^ *2 ' > fadhbanna.txt
@@ -86,3 +95,5 @@ installweb :
 	$(INSTALL_PROGRAM) ccweb /usr/local/bin
 
 .PRECIOUS : mor.db veicteoir.db huge.txt lengths.txt
+
+FORCE :
