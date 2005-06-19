@@ -266,10 +266,11 @@ while ($ARGV = shift @ARGV) {
 		next;
 	}
 	my $aref;
+	system "sed '/^#~/,\$d' $ARGV > /tmp/tmpinput.po";
 {
 
 	local $SIG{__WARN__} = 'my_warn';
-	$aref = Locale::PO->load_file_asarray($ARGV);
+	$aref = Locale::PO->load_file_asarray('/tmp/tmpinput.po');
 }
 	my $counter = 0;
 	foreach my $msg (@$aref) {
@@ -291,6 +292,7 @@ while ($ARGV = shift @ARGV) {
 		exit 1;
 	}
 	else {
+		system "/home/kps/clar/libexec/defunctfix $ARGV /tmp/temp2.po";
 		my $rv2 = system "diff -u $ARGV /tmp/temp2.po";
 #		my $diff = diff $ARGV, '/tmp/temp2.po', { STYLE => "Unified" };
 		if ($rv2) {
