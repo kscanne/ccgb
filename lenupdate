@@ -8,12 +8,11 @@ if (@ARGV == 0) {
 }
 
 my $LENDIR="/home/kps/gaeilge/diolaim/complen";
-my $DATADIR="/usr/local/share/corpas";
 my $BDCHARS="A-Za-z¡…Õ”⁄·ÈÌÛ˙";
 my $INTCHARS="'-";
 
 
-open (STOP, "<:bytes", "$DATADIR/stoplist") or die "Can't open file: $!\n";
+open (STOP, "<:bytes", "stoplist") or die "Can't open file: $!\n";
 my %stopwords;
 
 while (<STOP>) {
@@ -40,6 +39,7 @@ while ($ARGV = shift @ARGV) {
 			while ($line =~ m/<c>([^<]+)<\/c>/g) {
 				my $token = $1;	
 				$token =~ tr/A-Z¡…Õ”⁄/a-z·ÈÌÛ˙/;
+#				print "L=$num,TOKEN=\"$token\"\n";
 				$count++ if (!exists($stopwords{$token}) && length($token) > 1);
 			}
 			print OP "$num $count\n";
