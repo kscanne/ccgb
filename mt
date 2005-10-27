@@ -286,7 +286,8 @@ while ($ARGV = shift @ARGV) {
 			}
 		}
 	}
-	my $rv = system 'msgcat /tmp/temp.po > /tmp/temp2.po';
+	Locale::PO->save_file_fromarray('/tmp/temp.po',$aref);
+	my $rv = system 'msgcat --width=80 /tmp/temp.po > /tmp/temp2.po';
 	if ($rv > 0) {
 		print STDERR "Syntax errors in PO file, aborting...\n";
 		exit 1;
