@@ -20,6 +20,7 @@ installbin : ppfaigh
 	$(INSTALL_PROGRAM) qq $(bindir)/qq
 	$(INSTALL_PROGRAM) mutate $(bindir)/mutate
 	$(INSTALL_PROGRAM) mt $(bindir)/mt
+	$(INSTALL_PROGRAM) pptog $(bindir)/pptog  # for aimsigh
 	$(INSTALL_PROGRAM) ppfaigh $(libexecdir)/ppfaigh
 	$(INSTALL_PROGRAM) mivec $(libexecdir)/mivec
 	$(INSTALL_PROGRAM) ccxml $(libexecdir)/ccxml
