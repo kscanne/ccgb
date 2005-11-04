@@ -21,6 +21,14 @@ push @shellargs, "--max=$hits";
 push @shellargs, "--html"   if ( $format eq "html" );
 push @shellargs, "--mutate" if ( "@allargs" =~ /mutate/ );
 
+print $q->header( "text/$format" );     # http headers, not html headers!
+
+unless ( $ionchur ) {
+	print '<HTML><META HTTP-EQUIV="REFRESH" CONTENT="0;URL=http://borel.slu.edu/corpas/"></HTML>';
+	exit 0;
+}
+
+
 while ($ionchur =~ m/("[^"]+"|[^" ]\S+)/g) {
 	my $term = $1;
 	$term =~ s/^"//;
@@ -31,7 +39,6 @@ while ($ionchur =~ m/("[^"]+"|[^" ]\S+)/g) {
 
 local *PIPE;
 
-print $q->header( "text/$format" );     # http headers, not html headers!
 
 #unless ( $ionchur ) {
 #print "<a href=\"http://borel.slu.edu/corpas/\">Corpas Comhthreomhar</a>: carachtair neamhbhailí sa théacs";
