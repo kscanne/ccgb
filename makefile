@@ -16,7 +16,7 @@ webhome = /home/kps/public_html/corpas
 
 all : mor.db veicteoir.db ppfaigh lengths.txt
 
-installbin : ppfaigh
+installbin : ppfaigh pptog
 	$(INSTALL_PROGRAM) qq $(bindir)/qq
 	$(INSTALL_PROGRAM) mutate $(bindir)/mutate
 	$(INSTALL_PROGRAM) mt $(bindir)/mt
