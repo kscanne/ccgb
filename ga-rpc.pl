@@ -15,7 +15,7 @@ delete @ENV{ 'IFS', 'CDPATH', 'ENV', 'BASH_ENV' };
 # back into latin1, I add on more level of utf8 encoding before returning!!
 
 sub corpas {
-	my $CORPAS = '/usr/local/bin/ccxml';
+	my $CORPAS = '/usr/local/libexec/ccxml';
 	my $ionchur = "@_";
 	$ionchur =~ s/'/\'/g;
 	local *PIPE;
@@ -30,8 +30,6 @@ sub corpas {
 	from_to($toclient, "iso-8859-1", "utf-8"); 	
 	close PIPE;
         return $toclient;
-}
-    
 }
     
 $methods = {'gaeilge.corpas' => \&corpas
