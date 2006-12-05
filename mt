@@ -35,8 +35,7 @@ while (<STOPS>) {
 	$stoplist{$_}++;
 }
 close STOPS;
-open (FREQFILE, '/usr/local/share/crubadan/en/FREQ') or die "Error opening Engli
-sh frequencies: $!\n";
+open (FREQFILE, '/usr/local/share/crubadan/en/FREQ') or die "Error opening English frequencies: $!\n";
 while (<FREQFILE>) {
 	chomp;
 	my ($freq,$word) = split;
