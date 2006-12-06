@@ -18,7 +18,7 @@ map <F7> <C-W>b<C-W>h1G/>>F7<<<Return>jj1yy<C-W>t1G/^msgstr<Return>kpjdG
 map <F8> <C-W>b<C-W>h1G/>>F8<<<Return>jj1yy<C-W>t1G/^msgstr<Return>kpjdG
 map <F9> <C-W>b<C-W>h1G/>>F9<<<Return>jj1yy<C-W>t1G/^msgstr<Return>kpjdG
 " F10 = copy msgid to msgstr
-map <F10> <C-W>t1G/^msgstr<Return>dG:%y*<Return>Gpcwmsgstr<Esc>
+map <F10> <C-W>t1G/^msgstr<Return>dG:%y<Return>Gpcwmsgstr<Esc>
 " old F11 = clear current msgstr 
 " map <F11> <C-W>t1G/^msgstr<Return>dGomsgstr ""<Esc>
 " F11 = go into insert mode at beginning of msgstr
