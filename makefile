@@ -9,9 +9,9 @@ pkgdatadir = $(datadir)/corpas
 PARADIR = ${HOME}/gaeilge/diolaim/comp
 LENDIR = ${HOME}/gaeilge/diolaim/complen
 THISDIR = ${HOME}/gaeilge/corpas/corpas
-INSTALL = /bin/install -c
+INSTALL = /usr/bin/install -c
 INSTALL_DATA = ${INSTALL} -m 644
-INSTALL_PROGRAM = /bin/install -c
+INSTALL_PROGRAM = /usr/bin/install -c
 webhome = /home/kps/public_html/corpas
 
 all : mor.db veicteoir.db ppfaigh lengths.txt
