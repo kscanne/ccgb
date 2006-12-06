@@ -75,7 +75,7 @@ return 1;
 sub keep_if_keepable
 {
 my ($cand) = @_;
-if ($cand =~ m/../ && $cand =~ m/[a-z]/) {
+if ($cand =~ m/../ && $cand =~ m/[a-z]/ && $cand =~ m/^[A-Za-z'-]+$/) {
 	$currentlemmas{$cand}++ unless (exists($stoplist{$cand}));
 }
 }
@@ -212,7 +212,10 @@ get_focloir_hitz();
 open OUTPUT, ">/tmp/toedit.po";
 print OUTPUT "$id\nmsgstr \"\"\n";
 close OUTPUT;
-system 'vim -u /home/kps/.poeditrc -n /tmp/toedit.po';
+system 'cp -f /home/kps/.vimrc /home/kps/.vimrc.bak';
+system 'cp -f /home/kps/.poeditrc /home/kps/.vimrc';
+system 'vim -n /tmp/toedit.po';
+system 'cp -f /home/kps/.vimrc.bak /home/kps/.vimrc';
 open INPUT, "</tmp/toedit.po";
 my $msgstr_started = '';
 my $ans = '';
