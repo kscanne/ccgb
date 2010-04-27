@@ -23,7 +23,6 @@ installbin : ppfaigh pptog
 	$(INSTALL_PROGRAM) pptog $(bindir)/pptog  # for aimsigh
 	$(INSTALL_PROGRAM) ppfaigh $(libexecdir)/ppfaigh
 	$(INSTALL_PROGRAM) mivec $(libexecdir)/mivec
-	$(INSTALL_PROGRAM) ccxml $(libexecdir)/ccxml
 	$(INSTALL_PROGRAM) commontok $(libexecdir)/commontok
 	$(INSTALL_PROGRAM) quotekeep.pl $(libexecdir)/quotekeep.pl
 	$(INSTALL) -m 444 poeditrc $(HOME)/.poeditrc
@@ -45,7 +44,6 @@ uninstall :
 	rm -f $(bindir)/mt
 	rm -f $(libexecdir)/ppfaigh
 	rm -f $(libexecdir)/mivec
-	rm -f $(libexecdir)/ccxml
 	rm -f $(libexecdir)/commontok
 	rm -f $(libexecdir)/quotekeep.pl
 
@@ -67,6 +65,8 @@ lengths.txt : FORCE
 	find $(PARADIR) -name '*-b' | xargs perl lenupdate
 	(cd $(LENDIR); egrep -H . *) > lengths.txt
 
+# finds sentences without matching pair on other side, usually because
+# of some skew in the sentence numbers in some file
 fadhbanna.txt : huge.txt
 	cat huge.txt | sed 's/ .*//' | sed 's/-b:/:/' | sort | uniq -c | egrep -v '^ *2 ' > fadhbanna.txt
 

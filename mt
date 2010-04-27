@@ -62,7 +62,9 @@ while (<DICT>) {
 	push @focloir,$_ if (/^([^ ]+)  /);
 }
 close DICT;
+# ASCII
 readrules('/home/kps/clar/sonrai/rules.bnc');
+# ASCII
 readirregfile('/home/kps/clar/sonrai/words.bnc');
 my $done_p = "";
 
@@ -289,7 +291,7 @@ while ($ARGV = shift @ARGV) {
 		}
 	}
 	Locale::PO->save_file_fromarray('/tmp/temp.po',$aref);
-	my $rv = system 'msgcat --width=80 /tmp/temp.po > /tmp/temp2.po';
+	my $rv = system '/usr/bin/msgcat --width=80 /tmp/temp.po > /tmp/temp2.po';
 	if ($rv > 0) {
 		print STDERR "Syntax errors in PO file, aborting...\n";
 		exit 1;

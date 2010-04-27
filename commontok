@@ -4,9 +4,10 @@
 #  e.g. all lowercase, no stopwords.
 #    So don't use it as a tokenizer for other projects.
 #   (This is why it is in libexec and not bin)
+#   ONLY CALLED FROM mivec I think
 
 DATAPATH=/usr/local/share/corpas
-BDCHARS="A-Za-z¡…Õ”⁄·ÈÌÛ˙"
+BDCHARS="A-Za-z√Å√â√ç√ì√ö√°√©√≠√≥√∫"
 INTCHARS="'-"
 
 tr -s "[:space:]" "\n" |

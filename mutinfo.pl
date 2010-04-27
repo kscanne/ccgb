@@ -10,7 +10,7 @@ my %ENGFREQ;
 my %IRISHFREQ;
 
 my $cutoff = 2;
-my $cosinecutoff = 0.6;
+my $cosinecutoff = 0.3;
 my $ratiolower = $cosinecutoff*$cosinecutoff;
 my $ratioupper = 1/$ratiolower;
 

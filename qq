@@ -1,4 +1,8 @@
 #!/bin/bash
+# called from ccweb (which is called from the corpas .cgi script)
+# also called from SC++ (see dentry.cxx)
+# also intended as something you could use from the command line too
+# Usage: qq --max=NUM [--html] [--mutate] SEARCHTERMS
 
 LIBEXECPATH=/usr/local/libexec
 MAXHITS=250
@@ -33,7 +37,7 @@ p
 ' |
 sed "
 /^<seg>/{
-s/\([^a-zA-Z·ÈÌÛ˙¡…Õ”⁄]\)${1}\([^a-zA-Z·ÈÌÛ˙¡…Õ”⁄]\)/\1<b class=\"gramadoir\">\2<\/b>\3/gI
+s/\([^a-zA-Z√°√©√≠√≥√∫√Å√â√ç√ì√ö]\)${1}\([^a-zA-Z√°√©√≠√≥√∫√Å√â√ç√ì√ö]\)/\1<b class=\"gramadoir\">\2<\/b>\3/gI
 s/^<seg>//
 s/<\/seg>$//
 }
@@ -43,16 +47,16 @@ s/<\/seg>$//
 versionout()
 {
 	echo "<p>"
-	echo "<a href="/corpas/index.html">Corpas Comhthreomhar Gaeilge-BÈarla</a>, leagan 0.01<br>"
-	echo "Copyright (C) 2004 <a href=\"http://borel.slu.edu/\">Kevin P. Scannell</a><br><br>"
+	echo "<a href="/corpas/index.html">Corpas Comhthreomhar Gaeilge-B√©arla</a>, leagan 0.01<br>"
+	echo "Copyright ¬© 2004-2010 <a href=\"http://borel.slu.edu/\">Kevin P. Scannell</a><br><br>"
 	echo "<i>"
-	echo "Is saorbhogearra an rÌomhchl·r seo; fÈach ar an bhunchÛd le haghaidh coinnÌollacha cÛipe·la.  NÌl bar·nta AR BITH ann; go fi˙ nÌl bar·nta ann d'INDÕOLTACHT nÛ FEILI⁄NACHT DO FHEIDHM AR LEITH, an oiread at· ceadaithe de rÈir dlÌ."
+	echo "Is saorbhogearra an r√≠omhchl√°r seo; f√©ach ar an bhunch√≥d le haghaidh coinn√≠ollacha c√≥ipe√°la.  N√≠l bar√°nta AR BITH ann; go fi√∫ n√≠l bar√°nta ann d'IND√çOLTACHT n√≥ FEILI√öNACHT D'FHEIDHM AR LEITH, an oiread at√° ceadaithe de r√©ir dl√≠."
 	echo "</i></p>"
 }
 
 tmx()
 {
-${LIBEXECPATH}/mivec "${MAXHITS}" "${MUTATER}" "$@" | iconv -f iso88591 -t utf8
+${LIBEXECPATH}/mivec "${MAXHITS}" "${MUTATER}" "$@"
 }
 
 html()
@@ -62,7 +66,7 @@ echo "\"http://www.w3.org/TR/html4/strict.dtd\">"
 echo "<html lang=\"ga\">"
 echo "<head>"
 echo "<title>Corpas Comhthreomhar Gaeilge-B&eacute;arla: Tortha&iacute;</title>"
-echo "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">"
+echo "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">"
 echo "<link rel=\"stylesheet\" href=\"http://borel.slu.edu/kps.css\" type=\"text/css\">"
 echo "</head>"
 echo "<body>"

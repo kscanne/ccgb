@@ -17,7 +17,7 @@ then
 s/^bh\([fF].\)/\1/
 s/^m\([bB].\)/\1/
 s/^g\([cC].\)/\1/
-s/^n\([dDgGAEIOU¡…Õ”⁄].\)/\1/
+s/^n\([dDgGAEIOU√Å√â√ç√ì√ö].\)/\1/
 s/^b\([pP].\)/\1/
 s/^t\([sS].\)/\1/
 s/^d\([tT].\)/\1/
@@ -28,7 +28,7 @@ s/^d\([tT].\)/\1/
 /^[Cc]ha[nr]$/{p; d}
 /^[Cc]heana$/{p; d}
 /^[Cc]homh$/{p; d}
-/^[Cc]hoÌche$/{p; d}
+/^[Cc]ho√≠che$/{p; d}
 /^[Tt]hairis$/{p; d}
 /^[Tt]hall$/{p; d}
 /^[Tt]har$/{p; d}
@@ -36,7 +36,7 @@ s/^d\([tT].\)/\1/
 /^[Tt]hart$/{p; d}
 /^[Tt]heas$/{p; d}
 /^[Tt]hiar$/{p; d}
-/^[Tt]hÌos$/{p; d}
+/^[Tt]h√≠os$/{p; d}
 /^[Tt]hoir$/{p; d}
 /^[Tt]huaidh$/{p; d}
 /^[Tt]huas$/{p; d}
@@ -50,17 +50,17 @@ sed '
 /^hata/{p; d}
 /^heitr/{p; d}
 /^hidr/{p; d}
-/^h[Ìi]odr/{p; d}
+/^h[√≠i]odr/{p; d}
 /^hip/{p; d}
-/^h[Ûo]ma/{p; d}
-s/^h\([aeiou·ÈÌÛ˙AEIOU¡…Õ”⁄].\)/\1/
+/^h[√≥o]ma/{p; d}
+s/^h\([aeiou√°√©√≠√≥√∫AEIOU√Å√â√ç√ì√ö].\)/\1/
 '
 else
 	while read x
 	do
 		echo "${x}"
 		echo "${x}" | 
-	sed -n 's/^[aeiou·ÈÌÛ˙].*$/n-&\
+	sed -n 's/^[aeiou√°√©√≠√≥√∫].*$/n-&\
 t-&\
 n&\
 t&\
@@ -80,7 +80,7 @@ d_&/p' | tr "_" "'"
 		echo "${x}" | sed -n "s/^[dg][^h']/n&/p"
 		echo "${x}" | sed -n "s/^f[^h]/bh&/p"
 		echo "${x}" | sed -n "s/^p[^h]/b&/p"
-		echo "${x}" | sed -n "s/^s[aeiou·ÈÌÛ˙lnr]/t&/p"
+		echo "${x}" | sed -n "s/^s[aeiou√°√©√≠√≥√∫lnr]/t&/p"
 		echo "${x}" | sed -n "s/^t[^h]/d&/p"
 	done
 fi

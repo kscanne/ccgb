@@ -3,7 +3,10 @@
 use strict;
 use warnings;
 
-open (INFILE, "<:bytes", $ARGV[0]) or die "Can't open file: $!";
+binmode STDOUT, ":utf8";
+binmode STDERR, ":utf8";
+
+open (INFILE, "<:utf8", $ARGV[0]) or die "Can't open file: $!";
 my $max = $ARGV[1];
 my $oksofar = 0;
 shift @ARGV;
