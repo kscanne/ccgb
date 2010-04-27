@@ -35,7 +35,7 @@ while (<STOPS>) {
 	$stoplist{$_}++;
 }
 close STOPS;
-open (FREQFILE, '/usr/local/share/crubadan/en/FREQ') or die "Error opening English frequencies: $!\n";
+open (FREQFILE, "<:utf8", '/usr/local/share/crubadan/en/FREQ') or die "Error opening English frequencies: $!\n";
 while (<FREQFILE>) {
 	chomp;
 	my ($freq,$word) = split;
@@ -57,7 +57,7 @@ while (<LENFILE>) {
 	$lenhash{$tag} = $len;
 }
 close LENFILE;
-open (DICT, '/home/kps/gaeilge/diolaim/c/en') or die "Error opening English-Irish dictionary: $!\n";
+open (DICT, "<:utf8", '/home/kps/gaeilge/diolaim/c/en') or die "Error opening English-Irish dictionary: $!\n";
 while (<DICT>) {
 	push @focloir,$_ if (/^([^ ]+)  /);
 }
@@ -137,7 +137,7 @@ sub userinput {
 # job of this function is to write out /tmp/focloirin.txt hits file
 sub get_focloir_hitz
 {
-	open OUTPUT, ">/tmp/focloirin.txt";
+	open OUTPUT, ">", "/tmp/focloirin.txt";
 	print OUTPUT "English-Irish dictionary\n";
 	my @hitz;
 	foreach my $word (keys %currentlemmas) {
@@ -176,7 +176,8 @@ sub get_best_corpus_hitz
 		}
 	}
 	my $count = 1;
-	open OUTPUT, ">/tmp/fuzzies.po";
+	# don't use utf8 here...
+	open OUTPUT, ">", "/tmp/fuzzies.po";
 	foreach my $en (sort {$candidates{$b} <=> $candidates{$a}} keys %candidates) {
 		print OUTPUT "#: >>F$count<< ($en)";
 		printf OUTPUT " E=%.3f\n", $candidates{$en};
