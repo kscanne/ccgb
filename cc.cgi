@@ -17,7 +17,7 @@ my $SEARCHENGINE = '/usr/local/bin/ccweb';
 my @shellargs;
 my $q = new CGI;
 $q->charset('UTF-8');
-my( $ionchur ) = $q->param( "foirm_ionchur" ) =~ /^(.+)$/;
+my( $ionchur ) = $q->param( "foirm_ionchur" ) =~ /^([^\x{00}-\x{1F}#%&()*+\/:;<>{}|~`_@]+)$/;
 #if (!is_utf8($ionchur)) {
 #	$ionchur = decode_utf8($ionchur);
 #}
