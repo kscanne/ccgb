@@ -89,9 +89,9 @@ get.o : get.c
 ppfaigh : get.o
 	gcc -o ppfaigh get.o -ldb
 
+#$(INSTALL_DATA) ll.html $(webhome)
 installweb :
 	$(INSTALL_DATA) index.html $(webhome)
-	$(INSTALL_DATA) ll.html $(webhome)
 	$(INSTALL_PROGRAM) cc.cgi /home/httpd/cgi-bin
 	$(INSTALL_PROGRAM) ccweb /usr/local/bin
 
