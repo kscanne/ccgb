@@ -31,7 +31,7 @@ while ($ARGV = shift @ARGV) {
 	$realname =~ s/^.*\/([^\/]+)$/$1/;
 	my @stat1 = stat("$LENDIR/$realname");
 	my @stat2 = stat($ARGV);
-	if ($stat2[9] > $stat1[9]) {
+	if (!defined($stat1[9]) or $stat2[9] > $stat1[9]) {
 		print "Updating $realname...\n";
 		open (INP, "<:utf8", $ARGV) or die "Can't open file: $!\n";
 		open (OP, ">:utf8", "$LENDIR/$realname") or die "Can't open file: $!\n";
