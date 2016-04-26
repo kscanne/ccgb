@@ -47,8 +47,8 @@ s/<\/seg>$//
 versionout()
 {
 	echo "<p>"
-	echo "<a href="/corpas/index.html">Corpas Comhthreomhar Gaeilge-Béarla</a>, leagan 0.01<br>"
-	echo "Copyright © 2004-2010 <a href=\"http://borel.slu.edu/\">Kevin P. Scannell</a><br><br>"
+	echo "<a href="/corpas/">Corpas Comhthreomhar Gaeilge-Béarla</a>, leagan 0.01<br>"
+	echo "Copyright © 2004-2016 <a href=\"//borel.slu.edu/\">Kevin P. Scannell</a><br><br>"
 	echo "<i>"
 	echo "Is saorbhogearra an ríomhchlár seo; féach ar an bhunchód le haghaidh coinníollacha cóipeála.  Níl baránta AR BITH ann; go fiú níl baránta ann d'INDÍOLTACHT nó FEILIÚNACHT D'FHEIDHM AR LEITH, an oiread atá ceadaithe de réir dlí."
 	echo "</i></p>"
@@ -67,7 +67,7 @@ echo "<html lang=\"ga\">"
 echo "<head>"
 echo "<title>Corpas Comhthreomhar Gaeilge-B&eacute;arla: Tortha&iacute;</title>"
 echo "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">"
-echo "<link rel=\"stylesheet\" href=\"http://borel.slu.edu/kps.css\" type=\"text/css\">"
+echo "<link rel=\"stylesheet\" href=\"//borel.slu.edu/kps.css\" type=\"text/css\">"
 echo "</head>"
 echo "<body>"
 versionout
